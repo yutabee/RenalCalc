@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,6 @@ import {
   Alert,
 } from 'react-native';
 
-// 型定義
 interface CKDStage {
   stage: string;
   description: string;
@@ -23,6 +22,7 @@ interface ResultCardProps {
   value: number;
   unit: string;
   stage?: CKDStage;
+  description?: string;
   isActive?: boolean;
 }
 
@@ -33,12 +33,12 @@ interface InputValidation {
   serumCr: number;
 }
 
-// ResultCardコンポーネント
 const ResultCard: React.FC<ResultCardProps> = ({
   title,
   value,
   unit,
   stage,
+  description,
   isActive = false,
 }) => (
   <View style={[styles.resultCard, isActive && styles.activeResultCard]}>
@@ -52,6 +52,7 @@ const ResultCard: React.FC<ResultCardProps> = ({
         </Text>
       </View>
     )}
+    {description && <Text style={styles.resultDescription}>{description}</Text>}
   </View>
 );
 
@@ -66,7 +67,6 @@ const App: React.FC = () => {
   const [egfr, setEgfr] = useState<number | null>(null);
   const [bsa, setBsa] = useState<number | null>(null);
 
-  // 入力値の検証
   const validateInputs = (): InputValidation => {
     const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
@@ -81,85 +81,78 @@ const App: React.FC = () => {
       throw new Error('年齢は18歳から120歳の範囲で入力してください');
     }
 
-    if (weightNum <= 0 || weightNum > 300) {
-      throw new Error('体重の値が範囲外です');
+    if (weightNum < 30 || weightNum > 150) {
+      throw new Error('体重は30kgから150kgの範囲で入力してください');
     }
 
-    if (heightNum <= 0 || heightNum > 300) {
-      throw new Error('身長の値が範囲外です');
+    if (heightNum < 120 || heightNum > 200) {
+      throw new Error('身長は120cmから200cmの範囲で入力してください');
     }
 
-    if (serumCr <= 0 || serumCr > 20) {
-      throw new Error('血清クレアチニン値が範囲外です');
+    if (serumCr < 0.3 || serumCr > 15) {
+      throw new Error('血清クレアチニン値が範囲外です（0.3-15.0 mg/dL）');
     }
 
     return {ageNum, weightNum, heightNum, serumCr};
   };
 
-  // 体表面積の計算（藤本式）
-  const calculateBSA = useCallback(
-    (heightCm: number, weightKg: number): number => {
-      return ((heightCm * weightKg) / 3600) ** 0.5;
-    },
-    [],
-  );
+  const calculateBSA = (heightCm: number, weightKg: number): number => {
+    return weightKg ** 0.444 * heightCm ** 0.663 * 0.008883;
+  };
 
-  // CCrの計算（Cockcroft-Gault）
-  const calculateCCR = useCallback(
-    (inputs: InputValidation) => {
-      const {ageNum, weightNum, heightNum, serumCr} = inputs;
+  const calculateCCR = (inputs: InputValidation) => {
+    const {ageNum, weightNum, heightNum, serumCr} = inputs;
 
-      try {
-        const bsaValue = calculateBSA(heightNum, weightNum);
-        const factor = sex === 'male' ? 1 : 0.85;
-        const ccrValue = ((140 - ageNum) * weightNum * factor) / (72 * serumCr);
-        const correctedCcr = ccrValue * (1.73 / bsaValue);
+    try {
+      const bsaValue = calculateBSA(heightNum, weightNum);
+      const factor = sex === 'male' ? 1 : 0.85;
+      const japaneseCorrection = 0.84;
 
-        setBsa(parseFloat(bsaValue.toFixed(2)));
-        setCcr(parseFloat(correctedCcr.toFixed(1)));
-      } catch (error) {
-        console.error('CCR計算エラー:', error);
-        throw error;
-      }
-    },
-    [sex, calculateBSA],
-  );
+      let ccrValue = ((140 - ageNum) * weightNum * factor) / (72 * serumCr);
+      ccrValue *= japaneseCorrection;
 
-  // eGFRの計算（日本人係数を使用）
-  const calculateEGFR = useCallback(
-    (inputs: InputValidation) => {
-      const {ageNum, serumCr} = inputs;
+      const correctedCcr = ccrValue * (1.73 / bsaValue);
 
-      try {
-        const isMale = sex === 'male';
-        const k = isMale ? 0.9 : 0.7;
-        const alpha = isMale ? -0.411 : -0.329;
-        const sexFactor = isMale ? 1 : 1.018;
-        const japaneseCoefficient = 0.813;
+      setBsa(parseFloat(bsaValue.toFixed(2)));
+      setCcr(parseFloat(correctedCcr.toFixed(1)));
+    } catch (error) {
+      console.error('CCR計算エラー:', error);
+      throw error;
+    }
+  };
 
-        let egfrValue = 141;
-        egfrValue *= Math.min(serumCr / k, 1) ** alpha;
-        egfrValue *= Math.max(serumCr / k, 1) ** -1.209;
-        egfrValue *= 0.993 ** ageNum;
-        egfrValue *= sexFactor;
-        egfrValue *= japaneseCoefficient;
+  const calculateEGFR = (inputs: InputValidation) => {
+    const {ageNum, serumCr} = inputs;
 
-        setEgfr(parseFloat(egfrValue.toFixed(1)));
-      } catch (error) {
-        console.error('eGFR計算エラー:', error);
-        throw error;
-      }
-    },
-    [sex],
-  );
+    try {
+      const isMale = sex === 'male';
+      const k = isMale ? 0.9 : 0.7;
+      const alpha = isMale ? -0.411 : -0.329;
+      const japaneseCoefficient = 0.813;
 
-  // CKD重症度分類の取得
-  const getCKDStage = useCallback((egfrValue: number): CKDStage => {
+      let egfrValue = 141;
+      egfrValue *= Math.min(serumCr / k, 1) ** alpha;
+      egfrValue *= Math.max(serumCr / k, 1) ** -1.209;
+      egfrValue *= 0.993 ** ageNum;
+      egfrValue *= isMale ? 1 : 1.018;
+      egfrValue *= japaneseCoefficient;
+
+      setEgfr(parseFloat(egfrValue.toFixed(1)));
+    } catch (error) {
+      console.error('eGFR計算エラー:', error);
+      throw error;
+    }
+  };
+
+  const getCKDStage = (egfrValue: number): CKDStage => {
     if (egfrValue >= 90) {
-      return {stage: 'G1', description: '正常または高値'};
+      return {
+        stage: 'G1',
+        description: '正常または高値（腎症の存在確認が必要）',
+      };
     }
     if (egfrValue >= 60) {
-      return {stage: 'G2', description: '軽度低下'};
+      return {stage: 'G2', description: '軽度低下（腎症の存在確認が必要）'};
     }
     if (egfrValue >= 45) {
       return {stage: 'G3a', description: '軽度～中等度低下'};
@@ -171,36 +164,29 @@ const App: React.FC = () => {
       return {stage: 'G4', description: '高度低下'};
     }
     return {stage: 'G5', description: '末期腎不全'};
-  }, []);
+  };
 
-  // メイン計算処理
-  const handleCalculate = useCallback(async () => {
+  // useCallbackではなく通常の関数として定義
+  const handleCalculate = async () => {
     try {
-      console.log('計算開始', {age, weight, height, serumCreatinine, sex});
-
-      // 入力値の検証
       const validatedInputs = validateInputs();
 
-      // 状態をリセット
       setBsa(null);
       setCcr(null);
       setEgfr(null);
 
-      // 計算を実行
       await Promise.all([
         calculateEGFR(validatedInputs),
         calculateCCR(validatedInputs),
       ]);
-
-      // 結果をログ出力
-      console.log('計算完了', {egfr, ccr, bsa});
     } catch (error) {
       console.error('計算エラー:', error);
       if (error instanceof Error) {
         Alert.alert('エラー', error.message);
       }
     }
-  }, [age, weight, height, serumCreatinine, sex, calculateEGFR, calculateCCR]);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -208,7 +194,9 @@ const App: React.FC = () => {
         style={styles.keyboardAvoid}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.title}>腎機能評価</Text>
-          <Text style={styles.subtitle}>eGFR・CCr 計算ツール</Text>
+          <Text style={styles.subtitle}>
+            eGFR・CCr 計算ツール（日本腎臓学会2018年版準拠）
+          </Text>
 
           <View style={styles.inputSection}>
             <View style={styles.inputGroup}>
@@ -249,7 +237,7 @@ const App: React.FC = () => {
               <Text style={styles.label}>年齢</Text>
               <TextInput
                 style={styles.input}
-                placeholder="年齢を入力"
+                placeholder="年齢を入力（18-120）"
                 keyboardType="numeric"
                 value={age}
                 onChangeText={setAge}
@@ -262,7 +250,7 @@ const App: React.FC = () => {
               <Text style={styles.label}>身長</Text>
               <TextInput
                 style={styles.input}
-                placeholder="身長を入力"
+                placeholder="身長を入力（120-200）"
                 keyboardType="numeric"
                 value={height}
                 onChangeText={setHeight}
@@ -275,7 +263,7 @@ const App: React.FC = () => {
               <Text style={styles.label}>体重</Text>
               <TextInput
                 style={styles.input}
-                placeholder="体重を入力"
+                placeholder="体重を入力（30-150）"
                 keyboardType="numeric"
                 value={weight}
                 onChangeText={setWeight}
@@ -288,7 +276,7 @@ const App: React.FC = () => {
               <Text style={styles.label}>血清クレアチニン</Text>
               <TextInput
                 style={styles.input}
-                placeholder="数値を入力"
+                placeholder="数値を入力（0.3-15.0）"
                 keyboardType="numeric"
                 value={serumCreatinine}
                 onChangeText={setSerumCreatinine}
@@ -337,6 +325,10 @@ const App: React.FC = () => {
           <Text style={styles.disclaimer}>
             ※
             この計算結果は参考値です。実際の診断には、他の検査結果や臨床所見を含めた総合的な判断が必要です。
+            {'\n'}
+            日本腎臓学会2018年版のeGFR推算式に準拠しています。
+            {'\n'}
+            体表面積は藤本式（1960年）を使用しています。
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -487,6 +479,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2D6A4F',
     fontWeight: '600',
+  },
+  resultDescription: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 8,
+    textAlign: 'left',
   },
   bsaText: {
     fontSize: 14,
