@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 
+// 型定義
 interface CKDStage {
   stage: string;
   description: string;
@@ -25,6 +26,14 @@ interface ResultCardProps {
   isActive?: boolean;
 }
 
+interface InputValidation {
+  ageNum: number;
+  weightNum: number;
+  heightNum: number;
+  serumCr: number;
+}
+
+// ResultCardコンポーネント
 const ResultCard: React.FC<ResultCardProps> = ({
   title,
   value,
@@ -47,6 +56,7 @@ const ResultCard: React.FC<ResultCardProps> = ({
 );
 
 const App: React.FC = () => {
+  // State管理
   const [age, setAge] = useState<string>('');
   const [weight, setWeight] = useState<string>('');
   const [height, setHeight] = useState<string>('');
@@ -56,86 +66,95 @@ const App: React.FC = () => {
   const [egfr, setEgfr] = useState<number | null>(null);
   const [bsa, setBsa] = useState<number | null>(null);
 
+  // 入力値の検証
+  const validateInputs = (): InputValidation => {
+    const ageNum = parseFloat(age);
+    const weightNum = parseFloat(weight);
+    const heightNum = parseFloat(height);
+    const serumCr = parseFloat(serumCreatinine);
+
+    if (!ageNum || !weightNum || !heightNum || !serumCr) {
+      throw new Error('すべての値を入力してください');
+    }
+
+    if (ageNum < 18 || ageNum > 120) {
+      throw new Error('年齢は18歳から120歳の範囲で入力してください');
+    }
+
+    if (weightNum <= 0 || weightNum > 300) {
+      throw new Error('体重の値が範囲外です');
+    }
+
+    if (heightNum <= 0 || heightNum > 300) {
+      throw new Error('身長の値が範囲外です');
+    }
+
+    if (serumCr <= 0 || serumCr > 20) {
+      throw new Error('血清クレアチニン値が範囲外です');
+    }
+
+    return {ageNum, weightNum, heightNum, serumCr};
+  };
+
   // 体表面積の計算（藤本式）
-  const calculateBSA = (heightCm: number, weightKg: number): number => {
-    // ここでparseFloatは不要
-    return ((heightCm * weightKg) / 3600) ** 0.5;
-  };
+  const calculateBSA = useCallback(
+    (heightCm: number, weightKg: number): number => {
+      return ((heightCm * weightKg) / 3600) ** 0.5;
+    },
+    [],
+  );
 
-  const calculateCCR = () => {
-    try {
-      const ageNum = parseFloat(age);
-      const weightNum = parseFloat(weight);
-      const serumCr = parseFloat(serumCreatinine);
-      const heightNum = parseFloat(height);
+  // CCrの計算（Cockcroft-Gault）
+  const calculateCCR = useCallback(
+    (inputs: InputValidation) => {
+      const {ageNum, weightNum, heightNum, serumCr} = inputs;
 
-      if (!ageNum || !weightNum || !serumCr || !heightNum) {
-        throw new Error('すべての値を入力してください');
+      try {
+        const bsaValue = calculateBSA(heightNum, weightNum);
+        const factor = sex === 'male' ? 1 : 0.85;
+        const ccrValue = ((140 - ageNum) * weightNum * factor) / (72 * serumCr);
+        const correctedCcr = ccrValue * (1.73 / bsaValue);
+
+        setBsa(parseFloat(bsaValue.toFixed(2)));
+        setCcr(parseFloat(correctedCcr.toFixed(1)));
+      } catch (error) {
+        console.error('CCR計算エラー:', error);
+        throw error;
       }
+    },
+    [sex, calculateBSA],
+  );
 
-      if (ageNum < 18 || ageNum > 120) {
-        throw new Error('年齢は18歳から120歳の範囲で入力してください');
+  // eGFRの計算（日本人係数を使用）
+  const calculateEGFR = useCallback(
+    (inputs: InputValidation) => {
+      const {ageNum, serumCr} = inputs;
+
+      try {
+        const isMale = sex === 'male';
+        const k = isMale ? 0.9 : 0.7;
+        const alpha = isMale ? -0.411 : -0.329;
+        const sexFactor = isMale ? 1 : 1.018;
+        const japaneseCoefficient = 0.813;
+
+        let egfrValue = 141;
+        egfrValue *= Math.min(serumCr / k, 1) ** alpha;
+        egfrValue *= Math.max(serumCr / k, 1) ** -1.209;
+        egfrValue *= 0.993 ** ageNum;
+        egfrValue *= sexFactor;
+        egfrValue *= japaneseCoefficient;
+
+        setEgfr(parseFloat(egfrValue.toFixed(1)));
+      } catch (error) {
+        console.error('eGFR計算エラー:', error);
+        throw error;
       }
+    },
+    [sex],
+  );
 
-      if (serumCr <= 0 || serumCr > 20) {
-        throw new Error('血清クレアチニン値が範囲外です');
-      }
-
-      const bsaValue = calculateBSA(heightNum, weightNum);
-      setBsa(parseFloat(bsaValue.toFixed(2)));
-
-      const factor = sex === 'male' ? 1 : 0.85;
-      const ccrValue = ((140 - ageNum) * weightNum * factor) / (72 * serumCr);
-
-      const correctedCcr = ccrValue * (1.73 / bsaValue);
-
-      setCcr(parseFloat(correctedCcr.toFixed(1)));
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert('エラー', error.message);
-      }
-    }
-  };
-
-  const calculateEGFR = () => {
-    try {
-      const serumCr = parseFloat(serumCreatinine);
-      const ageNum = parseFloat(age);
-
-      if (!ageNum || !serumCr) {
-        throw new Error('年齢と血清クレアチニン値を入力してください');
-      }
-
-      if (ageNum < 18 || ageNum > 120) {
-        throw new Error('年齢は18歳から120歳の範囲で入力してください');
-      }
-
-      if (serumCr <= 0 || serumCr > 20) {
-        throw new Error('血清クレアチニン値が範囲外です');
-      }
-
-      const isMale = sex === 'male';
-      const k = isMale ? 0.9 : 0.7;
-      const alpha = isMale ? -0.411 : -0.329;
-      const sexFactor = isMale ? 1 : 1.018;
-      const japaneseCoefficient = 0.813;
-
-      let egfrValue = 141;
-      egfrValue *= Math.min(serumCr / k, 1) ** alpha;
-      egfrValue *= Math.max(serumCr / k, 1) ** -1.209;
-      egfrValue *= 0.993 ** ageNum;
-      egfrValue *= sexFactor;
-      egfrValue *= japaneseCoefficient;
-
-      setEgfr(parseFloat(egfrValue.toFixed(1)));
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert('エラー', error.message);
-      }
-    }
-  };
-
-  const getCKDStage = (egfrValue: number): CKDStage => {
+  // CKD重症度分類の取得
+  const getCKDStage = useCallback((egfrValue: number): CKDStage => {
     if (egfrValue >= 90) {
       return {stage: 'G1', description: '正常または高値'};
     }
@@ -152,8 +171,36 @@ const App: React.FC = () => {
       return {stage: 'G4', description: '高度低下'};
     }
     return {stage: 'G5', description: '末期腎不全'};
-  };
+  }, []);
 
+  // メイン計算処理
+  const handleCalculate = useCallback(async () => {
+    try {
+      console.log('計算開始', {age, weight, height, serumCreatinine, sex});
+
+      // 入力値の検証
+      const validatedInputs = validateInputs();
+
+      // 状態をリセット
+      setBsa(null);
+      setCcr(null);
+      setEgfr(null);
+
+      // 計算を実行
+      await Promise.all([
+        calculateEGFR(validatedInputs),
+        calculateCCR(validatedInputs),
+      ]);
+
+      // 結果をログ出力
+      console.log('計算完了', {egfr, ccr, bsa});
+    } catch (error) {
+      console.error('計算エラー:', error);
+      if (error instanceof Error) {
+        Alert.alert('エラー', error.message);
+      }
+    }
+  }, [age, weight, height, serumCreatinine, sex, calculateEGFR, calculateCCR]);
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -254,36 +301,33 @@ const App: React.FC = () => {
           <View style={styles.calculationButtons}>
             <TouchableOpacity
               style={styles.calculateButton}
-              onPress={() => {
-                calculateEGFR();
-                calculateCCR();
-              }}>
+              onPress={handleCalculate}>
               <Text style={styles.calculateButtonText}>計算する</Text>
             </TouchableOpacity>
           </View>
 
-          {(egfr !== null || ccr !== null) && (
+          {(egfr !== null || ccr !== null || bsa !== null) && (
             <View style={styles.resultsContainer}>
               <Text style={styles.resultsSectionTitle}>計算結果</Text>
-              <View style={styles.resultCards}>
-                {egfr !== null && (
+              {egfr !== null && (
+                <View style={styles.resultCards}>
                   <ResultCard
                     title="eGFR"
                     value={egfr}
                     unit="mL/min/1.73m²"
                     stage={getCKDStage(egfr)}
                   />
-                )}
-              </View>
-              <View style={styles.resultCards}>
-                {ccr !== null && (
+                </View>
+              )}
+              {ccr !== null && (
+                <View style={styles.resultCards}>
                   <ResultCard
                     title="CCr（補正値）"
                     value={ccr}
                     unit="mL/min/1.73m²"
                   />
-                )}
-              </View>
+                </View>
+              )}
               {bsa !== null && (
                 <Text style={styles.bsaText}>体表面積: {bsa} m²（藤本式）</Text>
               )}
@@ -301,7 +345,6 @@ const App: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // スタイル定義は同様
   container: {
     flex: 1,
     backgroundColor: '#F7F8FA',
