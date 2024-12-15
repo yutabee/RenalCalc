@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 
+// 型定義
 interface CKDStage {
   stage: string;
   description: string;
@@ -33,6 +34,7 @@ interface InputValidation {
   serumCr: number;
 }
 
+// ResultCardコンポーネント
 const ResultCard: React.FC<ResultCardProps> = ({
   title,
   value,
@@ -55,6 +57,59 @@ const ResultCard: React.FC<ResultCardProps> = ({
     {description && <Text style={styles.resultDescription}>{description}</Text>}
   </View>
 );
+
+// 計算式の説明コンポーネント
+const FormulaAccordion: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <View style={styles.formulaSection}>
+      <TouchableOpacity
+        style={styles.formulaHeader}
+        onPress={() => setIsExpanded(!isExpanded)}>
+        <Text style={styles.formulaHeaderText}>計算式について</Text>
+        <Text style={styles.formulaHeaderIcon}>{isExpanded ? '▼' : '▶'}</Text>
+      </TouchableOpacity>
+
+      {isExpanded && (
+        <View style={styles.formulaContent}>
+          <Text style={styles.formulaTitle}>1. eGFR（推算糸球体濾過量）</Text>
+          <Text style={styles.formulaDescription}>
+            日本腎臓学会2018年版推算式{'\n'}
+            eGFR = 141 × min(Scr/k, 1)α × max(Scr/k,1)-1.209 × 0.993年齢 ×
+            性別補正 × 0.813
+            {'\n\n'}
+            k値: 男性 0.9, 女性 0.7{'\n'}
+            α値: 男性 -0.411, 女性 -0.329
+          </Text>
+
+          <Text style={styles.formulaTitle}>2. CCr（Cockcroft-Gault式）</Text>
+          <Text style={styles.formulaDescription}>
+            CCr = ((140 - 年齢) × 体重 × 性別係数) / (72 × Scr) × 0.84{'\n\n'}
+            性別係数: 男性 1.0, 女性 0.85{'\n'}
+            日本人補正係数: 0.84
+          </Text>
+
+          <Text style={styles.formulaTitle}>3. 体表面積（藤本式）</Text>
+          <Text style={styles.formulaDescription}>
+            BSA = 0.008883 × 体重0.444 × 身長0.663{'\n'}
+            単位: m²
+          </Text>
+
+          <Text style={styles.formulaTitle}>4. CKD重症度分類</Text>
+          <Text style={styles.formulaDescription}>
+            G1: eGFR ≥ 90{'\n'}
+            G2: 60 ≤ eGFR ＜ 90{'\n'}
+            G3a: 45 ≤ eGFR ＜ 60{'\n'}
+            G3b: 30 ≤ eGFR ＜ 45{'\n'}
+            G4: 15 ≤ eGFR ＜ 30{'\n'}
+            G5: eGFR ＜ 15
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+};
 
 const App: React.FC = () => {
   // State管理
@@ -166,7 +221,6 @@ const App: React.FC = () => {
     return {stage: 'G5', description: '末期腎不全'};
   };
 
-  // useCallbackではなく通常の関数として定義
   const handleCalculate = async () => {
     try {
       const validatedInputs = validateInputs();
@@ -321,6 +375,8 @@ const App: React.FC = () => {
               )}
             </View>
           )}
+
+          <FormulaAccordion />
 
           <Text style={styles.disclaimer}>
             ※
@@ -505,6 +561,50 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F7F4',
     borderColor: '#2D6A4F',
     borderWidth: 2,
+  },
+  // 計算式表示用のスタイル
+  formulaSection: {
+    marginTop: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  formulaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#F0F7F4',
+  },
+  formulaHeaderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2D6A4F',
+  },
+  formulaHeaderIcon: {
+    fontSize: 16,
+    color: '#2D6A4F',
+  },
+  formulaContent: {
+    padding: 16,
+  },
+  formulaTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  formulaDescription: {
+    fontSize: 13,
+    color: '#666666',
+    lineHeight: 18,
+    marginBottom: 16,
   },
 });
 
