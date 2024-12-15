@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,62 +11,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Animated,
 } from 'react-native';
-
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-
-// プライバシーポリシーページ
-const PrivacyPolicyScreen: React.FC = () => {
-  return (
-    <ScrollView style={styles.privacyContainer}>
-      <Text style={styles.privacyTitle}>プライバシーポリシー</Text>
-      <Text style={styles.privacyParagraph}>
-        ここにプライバシーポリシーの内容を記載します。{'\n'}
-        本アプリはユーザーの個人情報を取り扱う場合、その用途、保管方法、第三者提供の有無、セキュリティ対策、ユーザーが自身の情報を確認・削除する方法などを明記します。
-        {'\n\n'}
-        例:{'\n'}- 収集するデータとその目的{'\n'}- データの保存期間{'\n'}-
-        第三者提供の有無と内容{'\n'}- クッキーや類似技術の使用について{'\n'}-
-        問い合わせ窓口
-      </Text>
-    </ScrollView>
-  );
-};
-
-// 計算式一覧ページ
-const FormulasPage: React.FC = () => {
-  return (
-    <ScrollView style={styles.privacyContainer}>
-      <Text style={styles.privacyTitle}>計算式一覧</Text>
-      <Text style={styles.privacyParagraph}>
-        eGFR計算式、CCr計算式、体表面積算出式、CKD重症度分類についての説明を記載します。
-      </Text>
-      <Text style={styles.privacyParagraph}>
-        - eGFR: 日本腎臓学会2018年版推算式{'\n'}- CCr: Cockcroft-Gault式 +
-        日本人補正{'\n'}- BSA: 藤本式{'\n'}- CKD重症度分類: G1 ~ G5 の基準
-      </Text>
-    </ScrollView>
-  );
-};
-
-// 免責事項ページ
-const DisclaimerScreen: React.FC = () => {
-  return (
-    <ScrollView style={styles.privacyContainer}>
-      <Text style={styles.privacyTitle}>免責事項</Text>
-      <Text style={styles.privacyParagraph}>
-        このアプリで提供される情報および計算結果は、医療専門家の指導・判断を置き換えるものではありません。あくまで参考値としてご利用いただき、最終的な医療上の判断は必ず医師等の有資格の医療従事者にご相談ください。
-        {'\n\n'}
-        アプリ提供者は、このアプリの利用によるいかなる損害、トラブル、損失に対して一切の責任を負いません。ユーザーは自己責任で本アプリを利用してください。
-      </Text>
-    </ScrollView>
-  );
-};
 
 // 型定義
 interface CKDStage {
   stage: string;
   description: string;
+  color: string;
 }
 
 interface ResultCardProps {
@@ -85,6 +39,40 @@ interface InputValidation {
   serumCr: number;
 }
 
+interface ActionButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'secondary' | 'tertiary';
+  backgroundColor?: string;
+}
+
+// カスタムボタンコンポーネント
+const ActionButton: React.FC<ActionButtonProps> = ({
+  title,
+  onPress,
+  variant = 'primary',
+  backgroundColor,
+}) => (
+  <TouchableOpacity
+    style={[
+      styles.actionButton,
+      variant === 'secondary' && styles.actionButtonSecondary,
+      variant === 'tertiary' && styles.actionButtonTertiary,
+      backgroundColor && {backgroundColor},
+    ]}
+    onPress={onPress}
+    activeOpacity={0.7}>
+    <Text
+      style={[
+        styles.actionButtonText,
+        variant === 'secondary' && styles.actionButtonTextSecondary,
+        variant === 'tertiary' && styles.actionButtonTextTertiary,
+      ]}>
+      {title}
+    </Text>
+  </TouchableOpacity>
+);
+
 // ResultCardコンポーネント
 const ResultCard: React.FC<ResultCardProps> = ({
   title,
@@ -93,37 +81,94 @@ const ResultCard: React.FC<ResultCardProps> = ({
   stage,
   description,
   isActive = false,
-}) => (
-  <View style={[styles.resultCard, isActive && styles.activeResultCard]}>
-    <Text style={styles.resultTitle}>{title}</Text>
-    <Text style={styles.resultValue}>{value}</Text>
-    <Text style={styles.resultUnit}>{unit}</Text>
-    {stage && (
-      <View style={styles.stageContainer}>
-        <Text style={styles.stageText}>
-          {stage.stage}: {stage.description}
+}) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // fadeAnimを依存配列に追加
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.resultCard,
+        isActive && styles.activeResultCard,
+        {opacity: fadeAnim},
+      ]}>
+      <View style={styles.resultHeader}>
+        <Text style={styles.resultTitle}>{title}</Text>
+        <Text style={styles.resultValue}>
+          {value}
+          <Text style={styles.resultUnit}> {unit}</Text>
         </Text>
       </View>
-    )}
-    {description && <Text style={styles.resultDescription}>{description}</Text>}
-  </View>
-);
+      {stage && (
+        <View style={styles.stageContainer}>
+          <View style={[styles.stageBadge, {backgroundColor: stage.color}]}>
+            <Text style={styles.stageBadgeText}>{stage.stage}</Text>
+          </View>
+          <Text style={styles.stageDescription}>{stage.description}</Text>
+        </View>
+      )}
+      {description && (
+        <Text style={styles.resultDescription}>{description}</Text>
+      )}
+    </Animated.View>
+  );
+};
 
 // 計算式の説明コンポーネント
 const FormulaAccordion: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const heightAnim = useRef(new Animated.Value(0)).current;
+
+  // isExpanded, heightAnim を依存配列に追加
+  useEffect(() => {
+    Animated.timing(heightAnim, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isExpanded, heightAnim]);
 
   return (
     <View style={styles.formulaSection}>
       <TouchableOpacity
         style={styles.formulaHeader}
-        onPress={() => setIsExpanded(!isExpanded)}>
+        onPress={() => setIsExpanded(!isExpanded)}
+        activeOpacity={0.7}>
         <Text style={styles.formulaHeaderText}>計算式について</Text>
-        <Text style={styles.formulaHeaderIcon}>{isExpanded ? '▼' : '▶'}</Text>
+        <Animated.Text
+          style={[
+            styles.formulaHeaderIcon,
+            {
+              transform: [
+                {
+                  rotate: heightAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '180deg'],
+                  }),
+                },
+              ],
+            },
+          ]}>
+          ▼
+        </Animated.Text>
       </TouchableOpacity>
 
       {isExpanded && (
-        <View style={styles.formulaContent}>
+        <Animated.View
+          style={[
+            styles.formulaContent,
+            {
+              opacity: heightAnim,
+            },
+          ]}>
           <Text style={styles.formulaTitle}>1. eGFR（推算糸球体濾過量）</Text>
           <Text style={styles.formulaDescription}>
             日本腎臓学会2018年版推算式{'\n'}
@@ -149,21 +194,51 @@ const FormulaAccordion: React.FC = () => {
 
           <Text style={styles.formulaTitle}>4. CKD重症度分類</Text>
           <Text style={styles.formulaDescription}>
-            G1: eGFR ≥ 90{'\n'}
-            G2: 60 ≤ eGFR ＜ 90{'\n'}
-            G3a: 45 ≤ eGFR ＜ 60{'\n'}
-            G3b: 30 ≤ eGFR ＜ 45{'\n'}
-            G4: 15 ≤ eGFR ＜ 30{'\n'}
-            G5: eGFR ＜ 15
+            G1: eGFR ≥ 90 mL/min/1.73m²{'\n'}
+            G2: 60-89 mL/min/1.73m²{'\n'}
+            G3a: 45-59 mL/min/1.73m²{'\n'}
+            G3b: 30-44 mL/min/1.73m²{'\n'}
+            G4: 15-29 mL/min/1.73m²{'\n'}
+            G5: ＜15 mL/min/1.73m²
           </Text>
-        </View>
+        </Animated.View>
       )}
     </View>
   );
 };
 
+// CKDステージの色定義
+const CKD_STAGE_COLORS = {
+  G1: '#4CAF50', // 緑
+  G2: '#8BC34A', // 明るい緑
+  G3a: '#FFC107', // 黄色
+  G3b: '#FF9800', // オレンジ
+  G4: '#FF5722', // 深いオレンジ
+  G5: '#F44336', // 赤
+};
+
+// ダミー画面 (Formulas)
+const Formulas: React.FC = () => (
+  <View style={styles.privacyContainer}>
+    <Text style={styles.privacyTitle}>計算式一覧</Text>
+    <Text style={styles.privacyParagraph}>
+      ここに計算式一覧の詳細を記載します。
+    </Text>
+  </View>
+);
+
+// ダミー画面 (Disclaimer)
+const Disclaimer: React.FC = () => (
+  <View style={styles.privacyContainer}>
+    <Text style={styles.privacyTitle}>免責事項</Text>
+    <Text style={styles.privacyParagraph}>
+      ここに免責事項の詳細を記載します。
+    </Text>
+  </View>
+);
+
+// メインの入力フォームと計算機能を含むホーム画面
 const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
-  // State管理
   const [age, setAge] = useState<string>('');
   const [weight, setWeight] = useState<string>('');
   const [height, setHeight] = useState<string>('');
@@ -173,6 +248,10 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [egfr, setEgfr] = useState<number | null>(null);
   const [bsa, setBsa] = useState<number | null>(null);
 
+  // アニメーション用の値
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  // 入力値の検証
   const validateInputs = (): InputValidation => {
     const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
@@ -202,13 +281,14 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
     return {ageNum, weightNum, heightNum, serumCr};
   };
 
+  // 体表面積計算（藤本式）
   const calculateBSA = (heightCm: number, weightKg: number): number => {
     return weightKg ** 0.444 * heightCm ** 0.663 * 0.008883;
   };
 
+  // CCr計算
   const calculateCCR = (inputs: InputValidation) => {
     const {ageNum, weightNum, heightNum, serumCr} = inputs;
-
     try {
       const bsaValue = calculateBSA(heightNum, weightNum);
       const factor = sex === 'male' ? 1 : 0.85;
@@ -227,6 +307,7 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
+  // eGFR計算
   const calculateEGFR = (inputs: InputValidation) => {
     const {ageNum, serumCr} = inputs;
 
@@ -250,30 +331,66 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
+  // CKDステージ判定
   const getCKDStage = (egfrValue: number): CKDStage => {
     if (egfrValue >= 90) {
       return {
         stage: 'G1',
         description: '正常または高値（腎症の存在確認が必要）',
+        color: CKD_STAGE_COLORS.G1,
       };
     }
     if (egfrValue >= 60) {
-      return {stage: 'G2', description: '軽度低下（腎症の存在確認が必要）'};
+      return {
+        stage: 'G2',
+        description: '軽度低下（腎症の存在確認が必要）',
+        color: CKD_STAGE_COLORS.G2,
+      };
     }
     if (egfrValue >= 45) {
-      return {stage: 'G3a', description: '軽度～中等度低下'};
+      return {
+        stage: 'G3a',
+        description: '軽度～中等度低下',
+        color: CKD_STAGE_COLORS.G3a,
+      };
     }
     if (egfrValue >= 30) {
-      return {stage: 'G3b', description: '中等度～高度低下'};
+      return {
+        stage: 'G3b',
+        description: '中等度～高度低下',
+        color: CKD_STAGE_COLORS.G3b,
+      };
     }
     if (egfrValue >= 15) {
-      return {stage: 'G4', description: '高度低下'};
+      return {
+        stage: 'G4',
+        description: '高度低下',
+        color: CKD_STAGE_COLORS.G4,
+      };
     }
-    return {stage: 'G5', description: '末期腎不全'};
+    return {
+      stage: 'G5',
+      description: '末期腎不全',
+      color: CKD_STAGE_COLORS.G5,
+    };
   };
 
+  // 計算実行
   const handleCalculate = async () => {
     try {
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
       const validatedInputs = validateInputs();
 
       setBsa(null);
@@ -297,38 +414,10 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoid}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>腎機能評価</Text>
-          <Text style={styles.subtitle}>
-            eGFR・CCr 計算ツール（日本腎臓学会2018年版準拠）
-          </Text>
-
-          {/* 計算式ページへ遷移するためのボタン */}
-          <TouchableOpacity
-            style={[styles.calculateButton, {marginBottom: 20}]}
-            onPress={() => navigation.navigate('Formulas')}>
-            <Text style={styles.calculateButtonText}>計算式ページへ</Text>
-          </TouchableOpacity>
-
-          {/* プライバシーポリシーページへ遷移するためのボタン */}
-          <TouchableOpacity
-            style={[
-              styles.calculateButton,
-              {marginBottom: 20, backgroundColor: '#4F8EB3'},
-            ]}
-            onPress={() => navigation.navigate('PrivacyPolicy')}>
-            <Text style={styles.calculateButtonText}>プライバシーポリシー</Text>
-          </TouchableOpacity>
-
-          {/* 免責事項ページへのボタン追加 */}
-          <TouchableOpacity
-            style={[
-              styles.calculateButton,
-              {marginBottom: 20, backgroundColor: '#9E5A63'},
-            ]}
-            onPress={() => navigation.navigate('Disclaimer')}>
-            <Text style={styles.calculateButtonText}>免責事項</Text>
-          </TouchableOpacity>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}>
+          <Text style={styles.subtitle}>日本腎臓学会2018年版準拠</Text>
 
           <View style={styles.inputSection}>
             <View style={styles.inputGroup}>
@@ -339,7 +428,10 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
                     styles.segmentButton,
                     sex === 'male' && styles.segmentButtonActive,
                   ]}
-                  onPress={() => setSex('male')}>
+                  onPress={() => setSex('male')}
+                  accessibilityLabel="男性を選択"
+                  accessibilityRole="radio"
+                  accessibilityState={{checked: sex === 'male'}}>
                   <Text
                     style={[
                       styles.segmentButtonText,
@@ -353,7 +445,10 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
                     styles.segmentButton,
                     sex === 'female' && styles.segmentButtonActive,
                   ]}
-                  onPress={() => setSex('female')}>
+                  onPress={() => setSex('female')}
+                  accessibilityLabel="女性を選択"
+                  accessibilityRole="radio"
+                  accessibilityState={{checked: sex === 'female'}}>
                   <Text
                     style={[
                       styles.segmentButtonText,
@@ -369,11 +464,15 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               <Text style={styles.label}>年齢</Text>
               <TextInput
                 style={styles.input}
-                placeholder="年齢を入力（18-120）"
+                placeholder="18-120"
                 keyboardType="numeric"
                 value={age}
                 onChangeText={setAge}
+                maxLength={3}
                 placeholderTextColor="#A0A0A0"
+                accessibilityLabel="年齢入力"
+                accessibilityHint="18歳から120歳までの値を入力"
+                returnKeyType="next"
               />
               <Text style={styles.unit}>歳</Text>
             </View>
@@ -382,11 +481,15 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               <Text style={styles.label}>身長</Text>
               <TextInput
                 style={styles.input}
-                placeholder="身長を入力（120-200）"
+                placeholder="120-200"
                 keyboardType="numeric"
                 value={height}
                 onChangeText={setHeight}
+                maxLength={3}
                 placeholderTextColor="#A0A0A0"
+                accessibilityLabel="身長入力"
+                accessibilityHint="センチメートル単位で入力"
+                returnKeyType="next"
               />
               <Text style={styles.unit}>cm</Text>
             </View>
@@ -395,11 +498,15 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               <Text style={styles.label}>体重</Text>
               <TextInput
                 style={styles.input}
-                placeholder="体重を入力（30-150）"
+                placeholder="30-150"
                 keyboardType="numeric"
                 value={weight}
                 onChangeText={setWeight}
+                maxLength={3}
                 placeholderTextColor="#A0A0A0"
+                accessibilityLabel="体重入力"
+                accessibilityHint="キログラム単位で入力"
+                returnKeyType="next"
               />
               <Text style={styles.unit}>kg</Text>
             </View>
@@ -408,61 +515,75 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               <Text style={styles.label}>血清クレアチニン</Text>
               <TextInput
                 style={styles.input}
-                placeholder="数値を入力（0.3-15.0）"
-                keyboardType="numeric"
+                placeholder="0.3-15.0"
+                keyboardType="decimal-pad"
                 value={serumCreatinine}
                 onChangeText={setSerumCreatinine}
+                maxLength={5}
                 placeholderTextColor="#A0A0A0"
+                accessibilityLabel="血清クレアチニン入力"
+                accessibilityHint="mg/dL単位で入力"
+                returnKeyType="done"
               />
               <Text style={styles.unit}>mg/dL</Text>
             </View>
           </View>
 
           <View style={styles.calculationButtons}>
-            <TouchableOpacity
-              style={styles.calculateButton}
-              onPress={handleCalculate}>
-              <Text style={styles.calculateButtonText}>計算する</Text>
-            </TouchableOpacity>
+            <ActionButton
+              title="計算する"
+              onPress={handleCalculate}
+              variant="primary"
+            />
           </View>
 
-          {(egfr !== null || ccr !== null || bsa !== null) && (
-            <View style={styles.resultsContainer}>
-              <Text style={styles.resultsSectionTitle}>計算結果</Text>
-              {egfr !== null && (
-                <View style={styles.resultCards}>
+          <Animated.View style={[styles.resultsContainer, {opacity: fadeAnim}]}>
+            {(egfr !== null || ccr !== null || bsa !== null) && (
+              <>
+                <Text style={styles.resultsSectionTitle}>計算結果</Text>
+                {egfr !== null && (
                   <ResultCard
                     title="eGFR"
                     value={egfr}
                     unit="mL/min/1.73m²"
                     stage={getCKDStage(egfr)}
                   />
-                </View>
-              )}
-              {ccr !== null && (
-                <View style={styles.resultCards}>
+                )}
+                {ccr !== null && (
                   <ResultCard
                     title="CCr（補正値）"
                     value={ccr}
                     unit="mL/min/1.73m²"
                   />
-                </View>
-              )}
-              {bsa !== null && (
-                <Text style={styles.bsaText}>体表面積: {bsa} m²（藤本式）</Text>
-              )}
-            </View>
-          )}
+                )}
+                {bsa !== null && (
+                  <View style={styles.bsaContainer}>
+                    <Text style={styles.bsaText}>体表面積: {bsa} m²</Text>
+                    <Text style={styles.bsaSubtext}>（藤本式）</Text>
+                  </View>
+                )}
+              </>
+            )}
+          </Animated.View>
 
           <FormulaAccordion />
+
+          <View style={styles.footerButtons}>
+            <ActionButton
+              title="計算式の詳細"
+              onPress={() => navigation.navigate('Formulas')}
+              variant="secondary"
+            />
+            <ActionButton
+              title="免責事項"
+              onPress={() => navigation.navigate('Disclaimer')}
+              variant="tertiary"
+            />
+          </View>
 
           <Text style={styles.disclaimer}>
             ※
             この計算結果は参考値です。実際の診断には、他の検査結果や臨床所見を含めた総合的な判断が必要です。
-            {'\n'}
-            日本腎臓学会2018年版のeGFR推算式に準拠しています。
-            {'\n'}
-            体表面積は藤本式（1960年）を使用しています。
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -483,17 +604,12 @@ const RootApp: React.FC = () => {
         />
         <Stack.Screen
           name="Formulas"
-          component={FormulasPage}
+          component={Formulas}
           options={{title: '計算式一覧'}}
         />
         <Stack.Screen
-          name="PrivacyPolicy"
-          component={PrivacyPolicyScreen}
-          options={{title: 'プライバシーポリシー'}}
-        />
-        <Stack.Screen
           name="Disclaimer"
-          component={DisclaimerScreen}
+          component={Disclaimer}
           options={{title: '免責事項'}}
         />
       </Stack.Navigator>
@@ -512,32 +628,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContainer: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    textAlign: 'center',
-    marginTop: 20,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 32,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666666',
     textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 32,
+    marginBottom: 24,
+    fontWeight: '500',
   },
   inputSection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   inputGroup: {
     marginBottom: 20,
@@ -549,27 +660,30 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#F7F8FA',
+    backgroundColor: '#F5F5F5',
     borderRadius: 12,
     padding: 16,
-    fontSize: 16,
+    fontSize: 17,
     color: '#1A1A1A',
+    height: 48,
   },
   unit: {
     position: 'absolute',
     right: 16,
     top: 45,
     color: '#666666',
+    fontSize: 15,
   },
   segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: '#F7F8FA',
+    backgroundColor: '#F5F5F5',
     borderRadius: 12,
     padding: 4,
+    height: 40,
   },
   segmentButton: {
     flex: 1,
-    paddingVertical: 12,
+    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
   },
@@ -577,29 +691,46 @@ const styles = StyleSheet.create({
     backgroundColor: '#2D6A4F',
   },
   segmentButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666666',
+    fontWeight: '600',
   },
   segmentButtonTextActive: {
     color: '#FFFFFF',
+  },
+  actionButton: {
+    height: 50,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2D6A4F',
+    marginVertical: 8,
+  },
+  actionButtonSecondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#2D6A4F',
+  },
+  actionButtonTertiary: {
+    backgroundColor: 'transparent',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
     fontWeight: '600',
+  },
+  actionButtonTextSecondary: {
+    color: '#2D6A4F',
+  },
+  actionButtonTextTertiary: {
+    color: '#666666',
   },
   calculationButtons: {
     marginTop: 24,
   },
-  calculateButton: {
-    backgroundColor: '#2D6A4F',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-  },
-  calculateButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   resultsContainer: {
-    marginTop: 32,
+    marginTop: 8,
+    marginBottom: 24,
   },
   resultsSectionTitle: {
     fontSize: 20,
@@ -607,78 +738,89 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     marginBottom: 16,
   },
-  resultCards: {
-    marginBottom: 12,
-  },
   resultCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
   },
+  activeResultCard: {
+    borderWidth: 2,
+    borderColor: '#2D6A4F',
+  },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 12,
+  },
   resultTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '600',
     color: '#1A1A1A',
-    marginBottom: 8,
   },
   resultValue: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: '#2D6A4F',
-    marginBottom: 4,
   },
   resultUnit: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#666666',
-    marginBottom: 8,
   },
   stageContainer: {
-    backgroundColor: '#F0F7F4',
-    borderRadius: 8,
-    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 8,
   },
-  stageText: {
-    fontSize: 14,
-    color: '#2D6A4F',
+  stageBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  stageBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '600',
+  },
+  stageDescription: {
+    flex: 1,
+    fontSize: 14,
+    color: '#666666',
   },
   resultDescription: {
     fontSize: 14,
     color: '#666666',
     marginTop: 8,
-    textAlign: 'left',
+  },
+  bsaContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
   },
   bsaText: {
-    fontSize: 14,
-    color: '#666666',
-    marginTop: 8,
-    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#2D6A4F',
   },
-  disclaimer: {
-    fontSize: 12,
+  bsaSubtext: {
+    fontSize: 13,
     color: '#666666',
-    marginTop: 24,
-    marginBottom: 16,
-    textAlign: 'center',
-    lineHeight: 18,
-    paddingHorizontal: 20,
-  },
-  activeResultCard: {
-    backgroundColor: '#F0F7F4',
-    borderColor: '#2D6A4F',
-    borderWidth: 2,
+    marginTop: 4,
   },
   formulaSection: {
-    marginTop: 24,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     overflow: 'hidden',
+    marginBottom: 24,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
@@ -693,7 +835,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F7F4',
   },
   formulaHeaderText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: '#2D6A4F',
   },
@@ -705,34 +847,43 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   formulaTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1A1A1A',
     marginTop: 12,
     marginBottom: 8,
   },
   formulaDescription: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#666666',
-    lineHeight: 18,
+    lineHeight: 20,
     marginBottom: 16,
   },
-  // プライバシーポリシー、免責事項などのページスタイル
+  footerButtons: {
+    marginBottom: 24,
+  },
+  disclaimer: {
+    fontSize: 12,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 16,
+  },
   privacyContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    padding: 20,
+    padding: 16,
   },
   privacyTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
-    marginBottom: 16,
     color: '#1A1A1A',
+    marginBottom: 16,
   },
   privacyParagraph: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#333',
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#333333',
     marginBottom: 16,
   },
 });
