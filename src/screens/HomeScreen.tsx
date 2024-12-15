@@ -13,10 +13,26 @@ import {
   TextStyle,
 } from 'react-native';
 import {ActionButton} from '../components/ActionButton';
-import {FormulaAccordion} from '../components/FormulaAccordion';
 import {ResultCard} from '../components/ResultCard';
 import {InputField} from '../components/InputField';
 import {CKDStage, InputValidation} from '../types/interfaces';
+
+const SPACING = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 20,
+  xl: 24,
+};
+
+const FONTSIZE = {
+  xs: 12,
+  sm: 13,
+  md: 15,
+  lg: 16,
+  xl: 20,
+  xxl: 28,
+};
 
 const COLORS = {
   primary: '#1B2B4B',
@@ -92,29 +108,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   const calculateCCR = (inputs: InputValidation) => {
     const {ageNum, weightNum, serumCr} = inputs;
-    try {
-      let ccrValue = ((140 - ageNum) * weightNum) / (72 * serumCr);
-      if (sex === 'female') {
-        ccrValue *= 0.85;
-      }
-      setCcr(parseFloat(ccrValue.toFixed(1)));
-    } catch (error) {
-      console.error('CCR計算エラー:', error);
-      throw error;
+    let ccrValue = ((140 - ageNum) * weightNum) / (72 * serumCr);
+    if (sex === 'female') {
+      ccrValue *= 0.85;
     }
+    setCcr(parseFloat(ccrValue.toFixed(1)));
   };
 
   const calculateEGFR = (inputs: InputValidation) => {
     const {ageNum, serumCr} = inputs;
-    try {
-      const isMale = sex === 'male';
-      const base = 194 * Math.pow(serumCr, -1.094) * Math.pow(ageNum, -0.287);
-      const egfrValue = isMale ? base : base * 0.739;
-      setEgfr(parseFloat(egfrValue.toFixed(1)));
-    } catch (error) {
-      console.error('eGFR計算エラー:', error);
-      throw error;
-    }
+    const isMale = sex === 'male';
+    const base = 194 * Math.pow(serumCr, -1.094) * Math.pow(ageNum, -0.287);
+    const egfrValue = isMale ? base : base * 0.739;
+    setEgfr(parseFloat(egfrValue.toFixed(1)));
   };
 
   const getCKDStage = (egfrValue: number): CKDStage => {
@@ -126,11 +132,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       };
     }
     if (egfrValue >= 60) {
-      return {
-        stage: 'G2',
-        description: '軽度低下',
-        color: COLORS.ckdStages.G2,
-      };
+      return {stage: 'G2', description: '軽度低下', color: COLORS.ckdStages.G2};
     }
     if (egfrValue >= 45) {
       return {
@@ -147,17 +149,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       };
     }
     if (egfrValue >= 15) {
-      return {
-        stage: 'G4',
-        description: '高度低下',
-        color: COLORS.ckdStages.G4,
-      };
+      return {stage: 'G4', description: '高度低下', color: COLORS.ckdStages.G4};
     }
-    return {
-      stage: 'G5',
-      description: '末期腎不全',
-      color: COLORS.ckdStages.G5,
-    };
+    return {stage: 'G5', description: '末期腎不全', color: COLORS.ckdStages.G5};
   };
 
   const handleCalculate = async () => {
@@ -190,12 +184,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         (async () => calculateCCR(validatedInputs))(),
       ]);
     } catch (error) {
-      console.error('計算エラー:', error);
       if (error instanceof Error) {
         Alert.alert('エラー', error.message);
       }
     }
   };
+
+  const showResults = egfr !== null || ccr !== null || bsa !== null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -205,11 +200,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}>
+          {/* ヘッダーセクション */}
           <View style={styles.header}>
             <Text style={styles.title}>腎機能評価</Text>
             <Text style={styles.subtitle}>日本腎臓学会（JSN）推奨式</Text>
           </View>
 
+          {/* 入力フォームカード */}
           <View style={styles.card}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>性別</Text>
@@ -286,6 +283,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             />
           </View>
 
+          {/* 計算ボタン */}
           <View style={styles.actionContainer}>
             <ActionButton
               title="計算する"
@@ -294,33 +292,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             />
           </View>
 
-          <Animated.View style={[styles.resultsContainer, {opacity: fadeAnim}]}>
-            {(egfr !== null || ccr !== null || bsa !== null) && (
-              <>
-                <Text style={styles.sectionTitle}>計算結果</Text>
-                {egfr !== null && (
-                  <ResultCard
-                    title="eGFR"
-                    value={egfr}
-                    unit="mL/min/1.73m²"
-                    stage={getCKDStage(egfr)}
-                  />
-                )}
-                {ccr !== null && (
-                  <ResultCard title="CCr" value={ccr} unit="mL/min" />
-                )}
-                {bsa !== null && (
-                  <View style={styles.bsaCard}>
-                    <Text style={styles.bsaValue}>体表面積: {bsa} m²</Text>
-                    <Text style={styles.bsaNote}>（藤本式）</Text>
-                  </View>
-                )}
-              </>
-            )}
-          </Animated.View>
+          {/* 結果表示（結果がある時のみ描画） */}
+          {showResults && (
+            <Animated.View
+              style={[styles.resultsContainer, {opacity: fadeAnim}]}>
+              <Text style={styles.sectionTitle}>計算結果</Text>
+              {egfr !== null && (
+                <ResultCard
+                  title="eGFR"
+                  value={egfr}
+                  unit="mL/min/1.73m²"
+                  stage={getCKDStage(egfr)}
+                />
+              )}
+              {ccr !== null && (
+                <ResultCard title="CCr" value={ccr} unit="mL/min" />
+              )}
+              {bsa !== null && (
+                <View style={styles.bsaCard}>
+                  <Text style={styles.bsaValue}>体表面積: {bsa} m²</Text>
+                  <Text style={styles.bsaNote}>（藤本式）</Text>
+                </View>
+              )}
+            </Animated.View>
+          )}
 
-          <FormulaAccordion />
-
+          {/* フッター */}
           <View style={styles.footer}>
             <ActionButton
               title="計算式の詳細"
@@ -342,8 +339,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
               </TouchableOpacity>
             </View>
             <Text style={styles.disclaimer}>
-              ※ この計算結果は参考値です。実際の診断には他の検査結果や
-              臨床所見を含め総合的な判断が必要です。
+              ※
+              この計算結果は参考値です。実際の診断には他の検査結果や臨床所見を含め総合的な判断が必要です。
             </Text>
           </View>
         </ScrollView>
@@ -361,30 +358,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContainer: {
-    paddingBottom: 32,
+    paddingBottom: SPACING.lg,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.lg,
   },
   title: {
-    fontSize: 28,
+    fontSize: FONTSIZE.xxl,
     fontWeight: '700' as TextStyle['fontWeight'],
     color: COLORS.text.primary,
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: FONTSIZE.md,
     color: COLORS.text.secondary,
     lineHeight: 20,
   },
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: 20,
-    padding: 20,
-    marginHorizontal: 16,
-    marginBottom: 24,
+    padding: SPACING.lg,
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.lg,
     ...Platform.select({
       ios: {
         shadowColor: COLORS.primary,
@@ -398,19 +395,19 @@ const styles = StyleSheet.create({
     }),
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   label: {
-    fontSize: 15,
+    fontSize: FONTSIZE.md,
     fontWeight: '600' as TextStyle['fontWeight'],
     color: COLORS.text.primary,
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
   },
   segmentedControl: {
     flexDirection: 'row',
     backgroundColor: COLORS.primaryLight,
     borderRadius: 12,
-    padding: 4,
+    padding: SPACING.xs,
     height: 48,
   },
   segmentButton: {
@@ -423,7 +420,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   segmentButtonText: {
-    fontSize: 16,
+    fontSize: FONTSIZE.lg,
     color: COLORS.text.secondary,
     fontWeight: '600' as TextStyle['fontWeight'],
   },
@@ -431,23 +428,23 @@ const styles = StyleSheet.create({
     color: COLORS.surface,
   },
   actionContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   resultsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: FONTSIZE.xl,
     fontWeight: '700' as TextStyle['fontWeight'],
     color: COLORS.text.primary,
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   bsaCard: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
-    padding: 20,
+    padding: SPACING.lg,
     alignItems: 'center',
     ...Platform.select({
       ios: {
@@ -462,35 +459,35 @@ const styles = StyleSheet.create({
     }),
   },
   bsaValue: {
-    fontSize: 20,
+    fontSize: FONTSIZE.xl,
     fontWeight: '700' as TextStyle['fontWeight'],
     color: COLORS.primary,
   },
   bsaNote: {
-    fontSize: 13,
+    fontSize: FONTSIZE.sm,
     color: COLORS.text.secondary,
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
   footer: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.xl,
   },
   footerDivider: {
-    height: 24,
+    height: SPACING.lg,
   },
   legalLinks: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   legalButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
   },
   legalButtonText: {
-    fontSize: 13,
+    fontSize: FONTSIZE.sm,
     color: COLORS.text.secondary,
     textDecorationLine: 'underline',
   },
@@ -499,11 +496,11 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: 1.5,
     backgroundColor: COLORS.text.secondary,
-    marginHorizontal: 8,
+    marginHorizontal: SPACING.sm,
     opacity: 0.5,
   },
   disclaimer: {
-    fontSize: 12,
+    fontSize: FONTSIZE.xs,
     color: COLORS.text.secondary,
     textAlign: 'center',
     lineHeight: 18,
