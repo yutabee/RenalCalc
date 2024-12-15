@@ -8,13 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* RenalCalcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* RenalCalcTests.m */; };
+		0CC21B96D0B530DF495B6B1E /* libPods-RenalCalc-RenalCalcTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B868B19B72B78576F041882 /* libPods-RenalCalc-RenalCalcTests.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		4BA9BBC3D3489AAFBD502A78 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
-		585A7519E7F60873F207278A /* libPods-RenalCalc-RenalCalcTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 913951082B63E52EB59BF05E /* libPods-RenalCalc-RenalCalcTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		D0FF776793FB3340659BBA1F /* libPods-RenalCalc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C56FCCB231085178AEFF1362 /* libPods-RenalCalc.a */; };
+		978F203C0C1F1BF72661BF15 /* libPods-RenalCalc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CF8721C8FCCB612078EA0E60 /* libPods-RenalCalc.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,14 +38,14 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = RenalCalc/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = RenalCalc/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = RenalCalc/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		5A0A362BB66F5D76E744A6AB /* Pods-RenalCalc-RenalCalcTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc-RenalCalcTests.debug.xcconfig"; path = "Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests.debug.xcconfig"; sourceTree = "<group>"; };
-		7756C679782F80F11E7017B9 /* Pods-RenalCalc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc.debug.xcconfig"; path = "Target Support Files/Pods-RenalCalc/Pods-RenalCalc.debug.xcconfig"; sourceTree = "<group>"; };
+		1B868B19B72B78576F041882 /* libPods-RenalCalc-RenalCalcTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RenalCalc-RenalCalcTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		51287D4247BD404219EB9306 /* Pods-RenalCalc-RenalCalcTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc-RenalCalcTests.debug.xcconfig"; path = "Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = RenalCalc/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		913951082B63E52EB59BF05E /* libPods-RenalCalc-RenalCalcTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RenalCalc-RenalCalcTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C56FCCB231085178AEFF1362 /* libPods-RenalCalc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RenalCalc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C9CD18D89B8A07C04F4CC48F /* Pods-RenalCalc-RenalCalcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc-RenalCalcTests.release.xcconfig"; path = "Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests.release.xcconfig"; sourceTree = "<group>"; };
-		ECB1705DD8FEA3897ED79165 /* Pods-RenalCalc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc.release.xcconfig"; path = "Target Support Files/Pods-RenalCalc/Pods-RenalCalc.release.xcconfig"; sourceTree = "<group>"; };
+		9DD11E5B15267E5D0706CBE3 /* Pods-RenalCalc-RenalCalcTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc-RenalCalcTests.release.xcconfig"; path = "Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests.release.xcconfig"; sourceTree = "<group>"; };
+		C17D67490874E621CF786694 /* Pods-RenalCalc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc.release.xcconfig"; path = "Target Support Files/Pods-RenalCalc/Pods-RenalCalc.release.xcconfig"; sourceTree = "<group>"; };
+		CF8721C8FCCB612078EA0E60 /* libPods-RenalCalc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RenalCalc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F6D49DF096F34BAC05D6D657 /* Pods-RenalCalc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RenalCalc.debug.xcconfig"; path = "Target Support Files/Pods-RenalCalc/Pods-RenalCalc.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				585A7519E7F60873F207278A /* libPods-RenalCalc-RenalCalcTests.a in Frameworks */,
+				0CC21B96D0B530DF495B6B1E /* libPods-RenalCalc-RenalCalcTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,7 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0FF776793FB3340659BBA1F /* libPods-RenalCalc.a in Frameworks */,
+				978F203C0C1F1BF72661BF15 /* libPods-RenalCalc.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,8 +103,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				C56FCCB231085178AEFF1362 /* libPods-RenalCalc.a */,
-				913951082B63E52EB59BF05E /* libPods-RenalCalc-RenalCalcTests.a */,
+				CF8721C8FCCB612078EA0E60 /* libPods-RenalCalc.a */,
+				1B868B19B72B78576F041882 /* libPods-RenalCalc-RenalCalcTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -143,10 +143,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				7756C679782F80F11E7017B9 /* Pods-RenalCalc.debug.xcconfig */,
-				ECB1705DD8FEA3897ED79165 /* Pods-RenalCalc.release.xcconfig */,
-				5A0A362BB66F5D76E744A6AB /* Pods-RenalCalc-RenalCalcTests.debug.xcconfig */,
-				C9CD18D89B8A07C04F4CC48F /* Pods-RenalCalc-RenalCalcTests.release.xcconfig */,
+				F6D49DF096F34BAC05D6D657 /* Pods-RenalCalc.debug.xcconfig */,
+				C17D67490874E621CF786694 /* Pods-RenalCalc.release.xcconfig */,
+				51287D4247BD404219EB9306 /* Pods-RenalCalc-RenalCalcTests.debug.xcconfig */,
+				9DD11E5B15267E5D0706CBE3 /* Pods-RenalCalc-RenalCalcTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -158,12 +158,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "RenalCalcTests" */;
 			buildPhases = (
-				0F92485889BCF964DD0745EF /* [CP] Check Pods Manifest.lock */,
+				7FA2E8B43D8AEC7631F0ECD1 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				DFAC32C3ED306B98AC5A20AA /* [CP] Embed Pods Frameworks */,
-				578E3D2D73B490225B36D20D /* [CP] Copy Pods Resources */,
+				3D54E258DBCB03F59A9BD8C8 /* [CP] Embed Pods Frameworks */,
+				AFF20C06F60D830619D37904 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -179,13 +179,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "RenalCalc" */;
 			buildPhases = (
-				D41DCC3099FCBA66B6D45428 /* [CP] Check Pods Manifest.lock */,
+				4F71239B4A3401B9483A37E7 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				B28B22B5003A8B79BE46E4AB /* [CP] Embed Pods Frameworks */,
-				0FF1907DCE97D09BD6C418F4 /* [CP] Copy Pods Resources */,
+				A6F626FC87323E19EE9F0A1E /* [CP] Embed Pods Frameworks */,
+				3E258329452FDC7591F71AE0 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -269,29 +269,24 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		0F92485889BCF964DD0745EF /* [CP] Check Pods Manifest.lock */ = {
+		3D54E258DBCB03F59A9BD8C8 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
+			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-RenalCalc-RenalCalcTests-checkManifestLockResult.txt",
+				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		0FF1907DCE97D09BD6C418F4 /* [CP] Copy Pods Resources */ = {
+		3E258329452FDC7591F71AE0 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -308,41 +303,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RenalCalc/Pods-RenalCalc-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		578E3D2D73B490225B36D20D /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B28B22B5003A8B79BE46E4AB /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc/Pods-RenalCalc-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc/Pods-RenalCalc-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RenalCalc/Pods-RenalCalc-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		D41DCC3099FCBA66B6D45428 /* [CP] Check Pods Manifest.lock */ = {
+		4F71239B4A3401B9483A37E7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -364,21 +325,60 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		DFAC32C3ED306B98AC5A20AA /* [CP] Embed Pods Frameworks */ = {
+		7FA2E8B43D8AEC7631F0ECD1 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RenalCalc-RenalCalcTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A6F626FC87323E19EE9F0A1E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc/Pods-RenalCalc-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc/Pods-RenalCalc-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RenalCalc/Pods-RenalCalc-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AFF20C06F60D830619D37904 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RenalCalc-RenalCalcTests/Pods-RenalCalc-RenalCalcTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -414,7 +414,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5A0A362BB66F5D76E744A6AB /* Pods-RenalCalc-RenalCalcTests.debug.xcconfig */;
+			baseConfigurationReference = 51287D4247BD404219EB9306 /* Pods-RenalCalc-RenalCalcTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = WW832FWMK6;
@@ -442,7 +442,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C9CD18D89B8A07C04F4CC48F /* Pods-RenalCalc-RenalCalcTests.release.xcconfig */;
+			baseConfigurationReference = 9DD11E5B15267E5D0706CBE3 /* Pods-RenalCalc-RenalCalcTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -467,7 +467,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7756C679782F80F11E7017B9 /* Pods-RenalCalc.debug.xcconfig */;
+			baseConfigurationReference = F6D49DF096F34BAC05D6D657 /* Pods-RenalCalc.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -497,7 +497,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = ECB1705DD8FEA3897ED79165 /* Pods-RenalCalc.release.xcconfig */;
+			baseConfigurationReference = C17D67490874E621CF786694 /* Pods-RenalCalc.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -592,7 +592,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -661,7 +664,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
