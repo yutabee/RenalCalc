@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React, {useState} from 'react';
 import {
   View,
@@ -11,6 +12,42 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+
+// プライバシーポリシーページ
+const PrivacyPolicyScreen: React.FC = () => {
+  return (
+    <ScrollView style={styles.privacyContainer}>
+      <Text style={styles.privacyTitle}>プライバシーポリシー</Text>
+      <Text style={styles.privacyParagraph}>
+        ここにプライバシーポリシーの内容を記載します。{'\n'}
+        本アプリはユーザーの個人情報を取り扱う場合、その用途、保管方法、第三者提供の有無、セキュリティ対策、ユーザーが自身の情報を確認・削除する方法などを明記します。
+        {'\n\n'}
+        例:{'\n'}- 収集するデータとその目的{'\n'}- データの保存期間{'\n'}-
+        第三者提供の有無と内容{'\n'}- クッキーや類似技術の使用について{'\n'}-
+        問い合わせ窓口
+      </Text>
+    </ScrollView>
+  );
+};
+
+// 計算式一覧ページ（以前作成したものと同様の例）
+const FormulasPage: React.FC = () => {
+  return (
+    <ScrollView style={styles.privacyContainer}>
+      <Text style={styles.privacyTitle}>計算式一覧</Text>
+      <Text style={styles.privacyParagraph}>
+        eGFR計算式、CCr計算式、体表面積算出式、CKD重症度分類についての説明を記載します。
+      </Text>
+      <Text style={styles.privacyParagraph}>
+        - eGFR: 日本腎臓学会2018年版推算式{'\n'}- CCr: Cockcroft-Gault式 +
+        日本人補正{'\n'}- BSA: 藤本式{'\n'}- CKD重症度分類: G1 ~ G5 の基準
+      </Text>
+    </ScrollView>
+  );
+};
 
 // 型定義
 interface CKDStage {
@@ -111,7 +148,7 @@ const FormulaAccordion: React.FC = () => {
   );
 };
 
-const App: React.FC = () => {
+const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
   // State管理
   const [age, setAge] = useState<string>('');
   const [weight, setWeight] = useState<string>('');
@@ -251,6 +288,23 @@ const App: React.FC = () => {
           <Text style={styles.subtitle}>
             eGFR・CCr 計算ツール（日本腎臓学会2018年版準拠）
           </Text>
+
+          {/* 計算式ページへ遷移するためのボタン */}
+          <TouchableOpacity
+            style={[styles.calculateButton, {marginBottom: 20}]}
+            onPress={() => navigation.navigate('Formulas')}>
+            <Text style={styles.calculateButtonText}>計算式ページへ</Text>
+          </TouchableOpacity>
+
+          {/* プライバシーポリシーページへ遷移するためのボタン */}
+          <TouchableOpacity
+            style={[
+              styles.calculateButton,
+              {marginBottom: 20, backgroundColor: '#4F8EB3'},
+            ]}
+            onPress={() => navigation.navigate('PrivacyPolicy')}>
+            <Text style={styles.calculateButtonText}>プライバシーポリシー</Text>
+          </TouchableOpacity>
 
           <View style={styles.inputSection}>
             <View style={styles.inputGroup}>
@@ -392,6 +446,34 @@ const App: React.FC = () => {
   );
 };
 
+const Stack = createNativeStackNavigator();
+
+const RootApp: React.FC = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{title: '腎機能評価ツール'}}
+        />
+        <Stack.Screen
+          name="Formulas"
+          component={FormulasPage}
+          options={{title: '計算式一覧'}}
+        />
+        <Stack.Screen
+          name="PrivacyPolicy"
+          component={PrivacyPolicyScreen}
+          options={{title: 'プライバシーポリシー'}}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default RootApp;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -426,6 +508,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
+    marginBottom: 20,
   },
   inputGroup: {
     marginBottom: 20,
@@ -606,6 +689,22 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 16,
   },
+  // プライバシーポリシースタイル
+  privacyContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+  },
+  privacyTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 16,
+    color: '#1A1A1A',
+  },
+  privacyParagraph: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#333',
+    marginBottom: 16,
+  },
 });
-
-export default App;
