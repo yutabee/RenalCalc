@@ -7,29 +7,41 @@ import {
   Animated,
   Alert,
   TouchableOpacity,
-  TextInput,
   Platform,
   View,
+  StyleSheet,
+  TextStyle,
 } from 'react-native';
-import {styles} from '../styles';
 import {ActionButton} from '../components/ActionButton';
 import {FormulaAccordion} from '../components/FormulaAccordion';
 import {ResultCard} from '../components/ResultCard';
+import {InputField} from '../components/InputField';
 import {CKDStage, InputValidation} from '../types/interfaces';
+
+const COLORS = {
+  primary: '#1B2B4B',
+  primaryLight: '#E8ECF4',
+  background: '#F8F9FD',
+  surface: '#FFFFFF',
+  text: {
+    primary: '#1A1A1A',
+    secondary: '#6B7280',
+    placeholder: '#A0A0A0',
+  },
+  border: '#E2E8F0',
+  ckdStages: {
+    G1: '#4CAF50',
+    G2: '#8BC34A',
+    G3a: '#FFC107',
+    G3b: '#FF9800',
+    G4: '#FF5722',
+    G5: '#F44336',
+  },
+};
 
 interface HomeScreenProps {
   navigation: any;
 }
-
-// CKDステージカラー定義
-const CKD_STAGE_COLORS = {
-  G1: '#4CAF50',
-  G2: '#8BC34A',
-  G3a: '#FFC107',
-  G3b: '#FF9800',
-  G4: '#FF5722',
-  G5: '#F44336',
-};
 
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [age, setAge] = useState<string>('');
@@ -43,7 +55,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  // 入力値検証
   const validateInputs = (): InputValidation => {
     const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
@@ -55,30 +66,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
 
     if (ageNum < 18 || ageNum > 120) {
-      throw new Error('年齢は18-120の範囲で');
+      throw new Error('年齢は18-120の範囲で入力してください');
     }
 
     if (weightNum < 30 || weightNum > 150) {
-      throw new Error('体重は30-150kgの範囲で');
+      throw new Error('体重は30-150kgの範囲で入力してください');
     }
 
     if (heightNum < 120 || heightNum > 200) {
-      throw new Error('身長は120-200cmの範囲で');
+      throw new Error('身長は120-200cmの範囲で入力してください');
     }
 
     if (serumCr < 0.3 || serumCr > 15) {
-      throw new Error('血清クレアチニンは0.3-15.0 mg/dLの範囲で');
+      throw new Error(
+        '血清クレアチニンは0.3-15.0 mg/dLの範囲で入力してください',
+      );
     }
 
     return {ageNum, weightNum, heightNum, serumCr};
   };
 
-  // 藤本式によるBSA計算
   const calculateBSA = (heightCm: number, weightKg: number): number => {
     return Math.pow(weightKg, 0.444) * Math.pow(heightCm, 0.663) * 0.008883;
   };
 
-  // CCr計算 (Cockcroft-Gault式・日本人補正なし)
   const calculateCCR = (inputs: InputValidation) => {
     const {ageNum, weightNum, serumCr} = inputs;
     try {
@@ -93,12 +104,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   };
 
-  // eGFR計算（日本腎臓学会推奨式）
   const calculateEGFR = (inputs: InputValidation) => {
     const {ageNum, serumCr} = inputs;
     try {
       const isMale = sex === 'male';
-      // eGFR = 194 × (S-Cr)^-1.094 × (Age)^-0.287 × (女性は×0.739)
       const base = 194 * Math.pow(serumCr, -1.094) * Math.pow(ageNum, -0.287);
       const egfrValue = isMale ? base : base * 0.739;
       setEgfr(parseFloat(egfrValue.toFixed(1)));
@@ -108,41 +117,51 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   };
 
-  // CKDステージ判定
   const getCKDStage = (egfrValue: number): CKDStage => {
     if (egfrValue >= 90) {
       return {
         stage: 'G1',
         description: '正常または高値',
-        color: CKD_STAGE_COLORS.G1,
+        color: COLORS.ckdStages.G1,
       };
     }
     if (egfrValue >= 60) {
-      return {stage: 'G2', description: '軽度低下', color: CKD_STAGE_COLORS.G2};
+      return {
+        stage: 'G2',
+        description: '軽度低下',
+        color: COLORS.ckdStages.G2,
+      };
     }
     if (egfrValue >= 45) {
       return {
         stage: 'G3a',
         description: '軽度～中等度低下',
-        color: CKD_STAGE_COLORS.G3a,
+        color: COLORS.ckdStages.G3a,
       };
     }
     if (egfrValue >= 30) {
       return {
         stage: 'G3b',
         description: '中等度～高度低下',
-        color: CKD_STAGE_COLORS.G3b,
+        color: COLORS.ckdStages.G3b,
       };
     }
     if (egfrValue >= 15) {
-      return {stage: 'G4', description: '高度低下', color: CKD_STAGE_COLORS.G4};
+      return {
+        stage: 'G4',
+        description: '高度低下',
+        color: COLORS.ckdStages.G4,
+      };
     }
-    return {stage: 'G5', description: '末期腎不全', color: CKD_STAGE_COLORS.G5};
+    return {
+      stage: 'G5',
+      description: '末期腎不全',
+      color: COLORS.ckdStages.G5,
+    };
   };
 
   const handleCalculate = async () => {
     try {
-      // フェードアウト→フェードインアニメーション
       Animated.sequence([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -186,9 +205,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}>
-          <Text style={styles.subtitle}>日本腎臓学会（JSN）推奨式</Text>
-          <View style={styles.inputSection}>
-            {/* 性別選択 */}
+          <View style={styles.header}>
+            <Text style={styles.title}>腎機能評価</Text>
+            <Text style={styles.subtitle}>日本腎臓学会（JSN）推奨式</Text>
+          </View>
+
+          <View style={styles.card}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>性別</Text>
               <View style={styles.segmentedControl}>
@@ -229,68 +251,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
               </View>
             </View>
 
-            {/* 年齢 */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>年齢</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="18-120"
-                keyboardType="numeric"
-                value={age}
-                onChangeText={setAge}
-                maxLength={3}
-                placeholderTextColor="#A0A0A0"
-              />
-              <Text style={styles.unit}>歳</Text>
-            </View>
-
-            {/* 身長 */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>身長</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="120-200"
-                keyboardType="numeric"
-                value={height}
-                onChangeText={setHeight}
-                maxLength={3}
-                placeholderTextColor="#A0A0A0"
-              />
-              <Text style={styles.unit}>cm</Text>
-            </View>
-
-            {/* 体重 */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>体重</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="30-150"
-                keyboardType="numeric"
-                value={weight}
-                onChangeText={setWeight}
-                maxLength={3}
-                placeholderTextColor="#A0A0A0"
-              />
-              <Text style={styles.unit}>kg</Text>
-            </View>
-
-            {/* 血清クレアチニン */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>血清クレアチニン</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="0.3-15.0"
-                keyboardType="decimal-pad"
-                value={serumCreatinine}
-                onChangeText={setSerumCreatinine}
-                maxLength={5}
-                placeholderTextColor="#A0A0A0"
-              />
-              <Text style={styles.unit}>mg/dL</Text>
-            </View>
+            <InputField
+              label="年齢"
+              value={age}
+              onChangeText={setAge}
+              placeholder="18-120"
+              unit="歳"
+              maxLength={3}
+            />
+            <InputField
+              label="身長"
+              value={height}
+              onChangeText={setHeight}
+              placeholder="120-200"
+              unit="cm"
+              maxLength={3}
+            />
+            <InputField
+              label="体重"
+              value={weight}
+              onChangeText={setWeight}
+              placeholder="30-150"
+              unit="kg"
+              maxLength={3}
+            />
+            <InputField
+              label="血清クレアチニン"
+              value={serumCreatinine}
+              onChangeText={setSerumCreatinine}
+              placeholder="0.3-15.0"
+              unit="mg/dL"
+              maxLength={5}
+              keyboardType="decimal-pad"
+            />
           </View>
 
-          <View style={styles.calculationButtons}>
+          <View style={styles.actionContainer}>
             <ActionButton
               title="計算する"
               onPress={handleCalculate}
@@ -301,7 +297,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           <Animated.View style={[styles.resultsContainer, {opacity: fadeAnim}]}>
             {(egfr !== null || ccr !== null || bsa !== null) && (
               <>
-                <Text style={styles.resultsSectionTitle}>計算結果</Text>
+                <Text style={styles.sectionTitle}>計算結果</Text>
                 {egfr !== null && (
                   <ResultCard
                     title="eGFR"
@@ -314,9 +310,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                   <ResultCard title="CCr" value={ccr} unit="mL/min" />
                 )}
                 {bsa !== null && (
-                  <View style={styles.bsaContainer}>
-                    <Text style={styles.bsaText}>体表面積: {bsa} m²</Text>
-                    <Text style={styles.bsaSubtext}>（藤本式）</Text>
+                  <View style={styles.bsaCard}>
+                    <Text style={styles.bsaValue}>体表面積: {bsa} m²</Text>
+                    <Text style={styles.bsaNote}>（藤本式）</Text>
                   </View>
                 )}
               </>
@@ -325,34 +321,181 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
           <FormulaAccordion />
 
-          <View style={styles.footerButtons}>
+          <View style={styles.footer}>
             <ActionButton
               title="計算式の詳細"
               onPress={() => navigation.navigate('Formulas')}
               variant="secondary"
             />
-            <View style={styles.footerButtonsDivider} />
-            <View style={styles.footerButtonsRow}>
+            <View style={styles.footerLinks}>
               <ActionButton
                 title="プライバシーポリシー"
                 onPress={() => navigation.navigate('PrivacyPolicy')}
                 variant="tertiary"
               />
+              <View style={styles.linkDivider} />
               <ActionButton
                 title="免責事項"
                 onPress={() => navigation.navigate('Disclaimer')}
                 variant="tertiary"
               />
             </View>
+            <Text style={styles.disclaimer}>
+              ※
+              この計算結果は参考値です。実際の診断には他の検査結果や臨床所見を含め総合的な判断が必要です。
+            </Text>
           </View>
-          <Text style={styles.disclaimer}>
-            ※
-            この計算結果は参考値です。実際の診断には他の検査結果や臨床所見を含め総合的な判断が必要です。
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
+  scrollContainer: {
+    paddingBottom: 32,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700' as TextStyle['fontWeight'],
+    color: COLORS.text.primary,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: COLORS.text.secondary,
+    lineHeight: 20,
+  },
+  card: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 20,
+    marginHorizontal: 16,
+    marginBottom: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.primary,
+        shadowOffset: {width: 0, height: 4},
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: '600' as TextStyle['fontWeight'],
+    color: COLORS.text.primary,
+    marginBottom: 8,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: 12,
+    padding: 4,
+    height: 48,
+  },
+  segmentButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  segmentButtonActive: {
+    backgroundColor: COLORS.primary,
+  },
+  segmentButtonText: {
+    fontSize: 16,
+    color: COLORS.text.secondary,
+    fontWeight: '600' as TextStyle['fontWeight'],
+  },
+  segmentButtonTextActive: {
+    color: COLORS.surface,
+  },
+  actionContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  resultsContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700' as TextStyle['fontWeight'],
+    color: COLORS.text.primary,
+    marginBottom: 16,
+  },
+  bsaCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.primary,
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  bsaValue: {
+    fontSize: 20,
+    fontWeight: '700' as TextStyle['fontWeight'],
+    color: COLORS.primary,
+  },
+  bsaNote: {
+    fontSize: 13,
+    color: COLORS.text.secondary,
+    marginTop: 4,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 24,
+  },
+  footerLinks: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 12,
+    gap: 12,
+  },
+  linkDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 12,
+  },
+  disclaimer: {
+    fontSize: 13,
+    color: COLORS.text.secondary,
+    textAlign: 'center',
+    marginTop: 20,
+    lineHeight: 18,
+    paddingHorizontal: 20,
+  },
+});
 
 export default HomeScreen;
