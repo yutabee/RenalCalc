@@ -16,7 +16,6 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-// 型定義
 interface CKDStage {
   stage: string;
   description: string;
@@ -46,7 +45,6 @@ interface ActionButtonProps {
   backgroundColor?: string;
 }
 
-// カスタムボタンコンポーネント
 const ActionButton: React.FC<ActionButtonProps> = ({
   title,
   onPress,
@@ -73,7 +71,15 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   </TouchableOpacity>
 );
 
-// ResultCardコンポーネント
+const CKD_STAGE_COLORS = {
+  G1: '#4CAF50',
+  G2: '#8BC34A',
+  G3a: '#FFC107',
+  G3b: '#FF9800',
+  G4: '#FF5722',
+  G5: '#F44336',
+};
+
 const ResultCard: React.FC<ResultCardProps> = ({
   title,
   value,
@@ -84,7 +90,6 @@ const ResultCard: React.FC<ResultCardProps> = ({
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // fadeAnimを依存配列に追加
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -122,12 +127,10 @@ const ResultCard: React.FC<ResultCardProps> = ({
   );
 };
 
-// 計算式の説明コンポーネント
 const FormulaAccordion: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const heightAnim = useRef(new Animated.Value(0)).current;
 
-  // isExpanded, heightAnim を依存配列に追加
   useEffect(() => {
     Animated.timing(heightAnim, {
       toValue: isExpanded ? 1 : 0,
@@ -207,17 +210,21 @@ const FormulaAccordion: React.FC = () => {
   );
 };
 
-// CKDステージの色定義
-const CKD_STAGE_COLORS = {
-  G1: '#4CAF50', // 緑
-  G2: '#8BC34A', // 明るい緑
-  G3a: '#FFC107', // 黄色
-  G3b: '#FF9800', // オレンジ
-  G4: '#FF5722', // 深いオレンジ
-  G5: '#F44336', // 赤
-};
+// プライバシーポリシーページ
+const PrivacyPolicy: React.FC = () => (
+  <View style={styles.privacyContainer}>
+    <Text style={styles.privacyTitle}>プライバシーポリシー</Text>
+    <Text style={styles.privacyParagraph}>
+      ここにプライバシーポリシーの文言を記載します。
+      {'\n\n'}- 本アプリが取得する情報とその目的{'\n'}-
+      利用者の権利（情報の閲覧、修正、削除請求など）{'\n'}-
+      クッキー・類似技術の使用{'\n'}- 第三者への提供有無と範囲{'\n'}-
+      データの保存期間{'\n'}- セキュリティ対策{'\n'}- お問い合わせ窓口 など
+    </Text>
+  </View>
+);
 
-// ダミー画面 (Formulas)
+// 計算式一覧(ダミー)
 const Formulas: React.FC = () => (
   <View style={styles.privacyContainer}>
     <Text style={styles.privacyTitle}>計算式一覧</Text>
@@ -227,7 +234,7 @@ const Formulas: React.FC = () => (
   </View>
 );
 
-// ダミー画面 (Disclaimer)
+// 免責事項(ダミー)
 const Disclaimer: React.FC = () => (
   <View style={styles.privacyContainer}>
     <Text style={styles.privacyTitle}>免責事項</Text>
@@ -237,7 +244,6 @@ const Disclaimer: React.FC = () => (
   </View>
 );
 
-// メインの入力フォームと計算機能を含むホーム画面
 const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [age, setAge] = useState<string>('');
   const [weight, setWeight] = useState<string>('');
@@ -248,10 +254,8 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [egfr, setEgfr] = useState<number | null>(null);
   const [bsa, setBsa] = useState<number | null>(null);
 
-  // アニメーション用の値
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  // 入力値の検証
   const validateInputs = (): InputValidation => {
     const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
@@ -281,14 +285,13 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
     return {ageNum, weightNum, heightNum, serumCr};
   };
 
-  // 体表面積計算（藤本式）
   const calculateBSA = (heightCm: number, weightKg: number): number => {
     return weightKg ** 0.444 * heightCm ** 0.663 * 0.008883;
   };
 
-  // CCr計算
   const calculateCCR = (inputs: InputValidation) => {
     const {ageNum, weightNum, heightNum, serumCr} = inputs;
+
     try {
       const bsaValue = calculateBSA(heightNum, weightNum);
       const factor = sex === 'male' ? 1 : 0.85;
@@ -307,7 +310,6 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
-  // eGFR計算
   const calculateEGFR = (inputs: InputValidation) => {
     const {ageNum, serumCr} = inputs;
 
@@ -331,7 +333,6 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
-  // CKDステージ判定
   const getCKDStage = (egfrValue: number): CKDStage => {
     if (egfrValue >= 90) {
       return {
@@ -375,7 +376,6 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
     };
   };
 
-  // 計算実行
   const handleCalculate = async () => {
     try {
       Animated.sequence([
@@ -568,6 +568,7 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
 
           <FormulaAccordion />
 
+          {/* ボタン群 */}
           <View style={styles.footerButtons}>
             <ActionButton
               title="計算式の詳細"
@@ -578,6 +579,13 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               title="免責事項"
               onPress={() => navigation.navigate('Disclaimer')}
               variant="tertiary"
+            />
+            {/* プライバシーポリシーへ遷移するボタン追加 */}
+            <ActionButton
+              title="プライバシーポリシー"
+              onPress={() => navigation.navigate('PrivacyPolicy')}
+              variant="tertiary"
+              backgroundColor="#4F8EB3"
             />
           </View>
 
@@ -611,6 +619,12 @@ const RootApp: React.FC = () => {
           name="Disclaimer"
           component={Disclaimer}
           options={{title: '免責事項'}}
+        />
+        {/* プライバシーポリシー画面追加 */}
+        <Stack.Screen
+          name="PrivacyPolicy"
+          component={PrivacyPolicy}
+          options={{title: 'プライバシーポリシー'}}
         />
       </Stack.Navigator>
     </NavigationContainer>
