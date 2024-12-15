@@ -418,7 +418,6 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}>
           <Text style={styles.subtitle}>日本腎臓学会2018年版準拠</Text>
-
           <View style={styles.inputSection}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>性別</Text>
@@ -528,7 +527,6 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               <Text style={styles.unit}>mg/dL</Text>
             </View>
           </View>
-
           <View style={styles.calculationButtons}>
             <ActionButton
               title="計算する"
@@ -536,7 +534,6 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               variant="primary"
             />
           </View>
-
           <Animated.View style={[styles.resultsContainer, {opacity: fadeAnim}]}>
             {(egfr !== null || ccr !== null || bsa !== null) && (
               <>
@@ -565,9 +562,7 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               </>
             )}
           </Animated.View>
-
           <FormulaAccordion />
-
           {/* ボタン群 */}
           <View style={styles.footerButtons}>
             <ActionButton
@@ -575,20 +570,20 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
               onPress={() => navigation.navigate('Formulas')}
               variant="secondary"
             />
-            <ActionButton
-              title="免責事項"
-              onPress={() => navigation.navigate('Disclaimer')}
-              variant="tertiary"
-            />
-            {/* プライバシーポリシーへ遷移するボタン追加 */}
-            <ActionButton
-              title="プライバシーポリシー"
-              onPress={() => navigation.navigate('PrivacyPolicy')}
-              variant="tertiary"
-              backgroundColor="#4F8EB3"
-            />
+            <View style={styles.footerButtonsDivider} />
+            <View style={styles.footerButtonsRow}>
+              <ActionButton
+                title="プライバシーポリシー"
+                onPress={() => navigation.navigate('PrivacyPolicy')}
+                variant="tertiary"
+              />
+              <ActionButton
+                title="免責事項"
+                onPress={() => navigation.navigate('Disclaimer')}
+                variant="tertiary"
+              />
+            </View>
           </View>
-
           <Text style={styles.disclaimer}>
             ※
             この計算結果は参考値です。実際の診断には、他の検査結果や臨床所見を含めた総合的な判断が必要です。
@@ -712,13 +707,29 @@ const styles = StyleSheet.create({
   segmentButtonTextActive: {
     color: '#FFFFFF',
   },
+  calculationButtons: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  footerButtons: {
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  footerButtonsDivider: {
+    height: 8,
+  },
+  footerButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   actionButton: {
-    height: 50,
-    borderRadius: 12,
+    height: 44,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2D6A4F',
-    marginVertical: 8,
+    paddingHorizontal: 16,
+    marginVertical: 4,
   },
   actionButtonSecondary: {
     backgroundColor: 'transparent',
@@ -727,20 +738,19 @@ const styles = StyleSheet.create({
   },
   actionButtonTertiary: {
     backgroundColor: 'transparent',
+    flex: 1,
   },
   actionButtonText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '600',
+    letterSpacing: -0.24,
   },
   actionButtonTextSecondary: {
     color: '#2D6A4F',
   },
   actionButtonTextTertiary: {
-    color: '#666666',
-  },
-  calculationButtons: {
-    marginTop: 24,
+    color: '#2D6A4F',
   },
   resultsContainer: {
     marginTop: 8,
@@ -872,9 +882,6 @@ const styles = StyleSheet.create({
     color: '#666666',
     lineHeight: 20,
     marginBottom: 16,
-  },
-  footerButtons: {
-    marginBottom: 24,
   },
   disclaimer: {
     fontSize: 12,
