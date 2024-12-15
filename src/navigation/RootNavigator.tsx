@@ -14,7 +14,7 @@ export const RootNavigator: React.FC = () => (
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{title: '腎機能評価ツール'}}
+        options={{title: 'RenalCalc'}}
       />
       <Stack.Screen
         name="Formulas"
