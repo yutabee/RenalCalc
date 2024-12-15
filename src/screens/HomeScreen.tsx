@@ -327,22 +327,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
               onPress={() => navigation.navigate('Formulas')}
               variant="secondary"
             />
-            <View style={styles.footerLinks}>
-              <ActionButton
-                title="プライバシーポリシー"
+            <View style={styles.footerDivider} />
+            <View style={styles.legalLinks}>
+              <TouchableOpacity
                 onPress={() => navigation.navigate('PrivacyPolicy')}
-                variant="tertiary"
-              />
-              <View style={styles.linkDivider} />
-              <ActionButton
-                title="免責事項"
+                style={styles.legalButton}>
+                <Text style={styles.legalButtonText}>プライバシーポリシー</Text>
+              </TouchableOpacity>
+              <View style={styles.legalDot} />
+              <TouchableOpacity
                 onPress={() => navigation.navigate('Disclaimer')}
-                variant="tertiary"
-              />
+                style={styles.legalButton}>
+                <Text style={styles.legalButtonText}>免責事項</Text>
+              </TouchableOpacity>
             </View>
             <Text style={styles.disclaimer}>
-              ※
-              この計算結果は参考値です。実際の診断には他の検査結果や臨床所見を含め総合的な判断が必要です。
+              ※ この計算結果は参考値です。実際の診断には他の検査結果や
+              臨床所見を含め総合的な判断が必要です。
             </Text>
           </View>
         </ScrollView>
@@ -475,26 +476,38 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 24,
   },
-  footerLinks: {
+  footerDivider: {
+    height: 24,
+  },
+  legalLinks: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
-    gap: 12,
+    marginBottom: 16,
   },
-  linkDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: COLORS.border,
-    marginHorizontal: 12,
+  legalButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
-  disclaimer: {
+  legalButtonText: {
     fontSize: 13,
     color: COLORS.text.secondary,
+    textDecorationLine: 'underline',
+  },
+  legalDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: COLORS.text.secondary,
+    marginHorizontal: 8,
+    opacity: 0.5,
+  },
+  disclaimer: {
+    fontSize: 12,
+    color: COLORS.text.secondary,
     textAlign: 'center',
-    marginTop: 20,
     lineHeight: 18,
-    paddingHorizontal: 20,
+    opacity: 0.8,
   },
 });
 
