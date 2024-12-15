@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "PharmaCalc.app"
-               BlueprintName = "PharmaCalc"
-               ReferencedContainer = "container:PharmaCalc.xcodeproj">
+               BuildableName = "RenalCalc.app"
+               BlueprintName = "RenalCalc"
+               ReferencedContainer = "container:RenalCalc.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "PharmaCalcTests.xctest"
-               BlueprintName = "PharmaCalcTests"
-               ReferencedContainer = "container:PharmaCalc.xcodeproj">
+               BuildableName = "RenalCalcTests.xctest"
+               BlueprintName = "RenalCalcTests"
+               ReferencedContainer = "container:RenalCalc.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "PharmaCalc.app"
-            BlueprintName = "PharmaCalc"
-            ReferencedContainer = "container:PharmaCalc.xcodeproj">
+            BuildableName = "RenalCalc.app"
+            BlueprintName = "RenalCalc"
+            ReferencedContainer = "container:RenalCalc.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "PharmaCalc.app"
-            BlueprintName = "PharmaCalc"
-            ReferencedContainer = "container:PharmaCalc.xcodeproj">
+            BuildableName = "RenalCalc.app"
+            BlueprintName = "RenalCalc"
+            ReferencedContainer = "container:RenalCalc.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
