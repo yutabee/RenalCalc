@@ -33,7 +33,7 @@ const PrivacyPolicyScreen: React.FC = () => {
   );
 };
 
-// 計算式一覧ページ（以前作成したものと同様の例）
+// 計算式一覧ページ
 const FormulasPage: React.FC = () => {
   return (
     <ScrollView style={styles.privacyContainer}>
@@ -44,6 +44,20 @@ const FormulasPage: React.FC = () => {
       <Text style={styles.privacyParagraph}>
         - eGFR: 日本腎臓学会2018年版推算式{'\n'}- CCr: Cockcroft-Gault式 +
         日本人補正{'\n'}- BSA: 藤本式{'\n'}- CKD重症度分類: G1 ~ G5 の基準
+      </Text>
+    </ScrollView>
+  );
+};
+
+// 免責事項ページ
+const DisclaimerScreen: React.FC = () => {
+  return (
+    <ScrollView style={styles.privacyContainer}>
+      <Text style={styles.privacyTitle}>免責事項</Text>
+      <Text style={styles.privacyParagraph}>
+        このアプリで提供される情報および計算結果は、医療専門家の指導・判断を置き換えるものではありません。あくまで参考値としてご利用いただき、最終的な医療上の判断は必ず医師等の有資格の医療従事者にご相談ください。
+        {'\n\n'}
+        アプリ提供者は、このアプリの利用によるいかなる損害、トラブル、損失に対して一切の責任を負いません。ユーザーは自己責任で本アプリを利用してください。
       </Text>
     </ScrollView>
   );
@@ -306,6 +320,16 @@ const HomeScreen: React.FC<{navigation: any}> = ({navigation}) => {
             <Text style={styles.calculateButtonText}>プライバシーポリシー</Text>
           </TouchableOpacity>
 
+          {/* 免責事項ページへのボタン追加 */}
+          <TouchableOpacity
+            style={[
+              styles.calculateButton,
+              {marginBottom: 20, backgroundColor: '#9E5A63'},
+            ]}
+            onPress={() => navigation.navigate('Disclaimer')}>
+            <Text style={styles.calculateButtonText}>免責事項</Text>
+          </TouchableOpacity>
+
           <View style={styles.inputSection}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>性別</Text>
@@ -466,6 +490,11 @@ const RootApp: React.FC = () => {
           name="PrivacyPolicy"
           component={PrivacyPolicyScreen}
           options={{title: 'プライバシーポリシー'}}
+        />
+        <Stack.Screen
+          name="Disclaimer"
+          component={DisclaimerScreen}
+          options={{title: '免責事項'}}
         />
       </Stack.Navigator>
     </NavigationContainer>
@@ -645,7 +674,6 @@ const styles = StyleSheet.create({
     borderColor: '#2D6A4F',
     borderWidth: 2,
   },
-  // 計算式表示用のスタイル
   formulaSection: {
     marginTop: 24,
     backgroundColor: '#FFFFFF',
@@ -689,7 +717,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 16,
   },
-  // プライバシーポリシースタイル
+  // プライバシーポリシー、免責事項などのページスタイル
   privacyContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
