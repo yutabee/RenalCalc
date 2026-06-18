@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   Platform,
 } from 'react-native';
+import {CONTACT_EMAIL} from '../constants/contact';
 
 const COLORS = {
   primary: '#1B2B4B',
@@ -64,7 +65,7 @@ const sections: Section[] = [
     title: '6. お問い合わせ先',
     content: [
       '本アプリに関するご質問・ご意見は下記メールアドレスまでお願いいたします：',
-      'yutabeee@gmail.com',
+      CONTACT_EMAIL,
     ],
   },
 ];
