@@ -2,6 +2,29 @@
   "name": "renalcalc",
   "version": "0.0.1",
   "private": true,
+  "description": "Open-source renal function calculator (eGFR, CCr, BSA, CKD staging) for Japanese clinical reference formulas, built with React Native.",
+  "license": "MIT",
+  "author": "Yuta Tamaru",
+  "homepage": "https://github.com/yutabee/RenalCalc#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yutabee/RenalCalc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yutabee/RenalCalc/issues"
+  },
+  "keywords": [
+    "react-native",
+    "medical",
+    "calculator",
+    "egfr",
+    "ccr",
+    "bsa",
+    "ckd",
+    "nephrology",
+    "kidney",
+    "healthcare"
+  ],
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
