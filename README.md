@@ -35,7 +35,15 @@ CKD stages (from eGFR): **G1** ≥ 90 · **G2** 60–89 · **G3a** 45–59 · **
 
 ## Screenshots
 
-> _TODO: add screenshots of the input form, results (eGFR + CKD stage), and the formulas screen._
+<p align="center">
+  <img src="docs/screenshots/01-home.png" width="240" alt="Input form — age, sex, height, weight, serum creatinine" />
+  &nbsp;
+  <img src="docs/screenshots/02-results.png" width="240" alt="Results — eGFR with CKD stage, CCr and BSA" />
+  &nbsp;
+  <img src="docs/screenshots/03-formulas.png" width="240" alt="Formulas screen with clinical references" />
+</p>
+
+<p align="center"><sub>Input form · Results (eGFR + CKD stage, CCr, BSA) · Formulas &amp; references</sub></p>
 
 ## Getting started
 
