@@ -73,7 +73,9 @@ describe('getCKDStage (boundaries)', () => {
   it('returns a description and no UI color field', () => {
     const result = getCKDStage(95);
     expect(result.description).toBe('正常または高値');
-    expect((result as unknown as Record<string, unknown>).color).toBeUndefined();
+    expect(
+      (result as unknown as Record<string, unknown>).color,
+    ).toBeUndefined();
   });
 });
 
