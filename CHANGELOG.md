@@ -9,21 +9,45 @@ boundary is treated as significant** and is called out explicitly below.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-06-19
+
+First public release.
+
 ### Added
 
-- Pure, unit-tested calculation module (`src/utils/calculations.ts`) extracted
-  from the home screen, with acceptance tests locking the eGFR, CCr, BSA and
-  CKD-stage reference values.
-- HomeScreen component tests via `@testing-library/react-native`.
-- Continuous integration (GitHub Actions): lint, typecheck, format check and
-  tests on Node 18 & 20; Dependabot for npm and GitHub Actions.
-- Open-source project files: `LICENSE` (MIT), `CONTRIBUTING`, `CODE_OF_CONDUCT`,
-  `SECURITY`, issue/PR templates, `CODEOWNERS`, and a rewritten `README`.
+- **Renal function calculators**: eGFR (Japanese Society of Nephrology
+  equation), creatinine clearance (Cockcroft–Gault), body surface area
+  (Fujimoto), and automatic CKD staging (G1–G5) — with the formulas and clinical
+  references shown in-app.
+- Input validation enforcing clinically plausible ranges with clear messages.
+- Pure, unit-tested calculation module (`src/utils/calculations.ts`) whose
+  reference values are locked by acceptance tests, plus component tests
+  (React Native Testing Library) and an enforced coverage threshold.
+- Continuous integration & delivery (GitHub Actions): lint, typecheck, format
+  and tests on Node 18 & 20; native Android and iOS build verification; gitleaks
+  secret scanning and a dependency audit; commitlint; Dependabot; and a
+  tag-driven release pipeline that publishes a GitHub Release with the Android
+  APK.
+- Open-source project files: MIT `LICENSE`, `CONTRIBUTING`, `CODE_OF_CONDUCT`,
+  `SECURITY`, issue/PR templates, `CODEOWNERS`, and a documented `README` with
+  screenshots.
 
 ### Changed
 
+- Built on React Native 0.86 / React 19.
+- Unified the application identifier to `io.github.yutabee.renalcalc` across
+  iOS and Android.
 - Hardened input validation to reject non-numeric input (e.g. `"12abc"`).
-- Stricter formatting/lint tooling (`typecheck`, `format`, `format:check`, `ci`
-  scripts; `.nvmrc`, `.prettierignore`).
+- Scaffolded environment-based Android release signing (no keystore committed).
 
-[Unreleased]: https://github.com/yutabee/RenalCalc/commits/main
+### Fixed
+
+- Completed the in-app Privacy Policy, which previously shipped with a
+  placeholder section.
+
+### Security
+
+- All calculations run on-device; no user input is transmitted to any server.
+
+[Unreleased]: https://github.com/yutabee/RenalCalc/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/yutabee/RenalCalc/releases/tag/v1.0.0
