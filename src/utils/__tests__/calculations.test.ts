@@ -3,6 +3,7 @@
  * Reference values are computed independently (see commit message) and locked here
  * to guard the medical formulas against regressions.
  */
+import {describe, it, expect} from '@jest/globals';
 import {
   calculateEGFR,
   calculateCCr,
@@ -72,7 +73,7 @@ describe('getCKDStage (boundaries)', () => {
   it('returns a description and no UI color field', () => {
     const result = getCKDStage(95);
     expect(result.description).toBe('正常または高値');
-    expect((result as Record<string, unknown>).color).toBeUndefined();
+    expect((result as unknown as Record<string, unknown>).color).toBeUndefined();
   });
 });
 
