@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security or sensitive clinical-accuracy report
+    url: https://github.com/yutabee/RenalCalc/security/advisories/new
+    about: Please report vulnerabilities and sensitive accuracy issues privately (see SECURITY.md).

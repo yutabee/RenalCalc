@@ -1,0 +1,9 @@
+# Default owner for everything in the repo.
+*                                   @yutabee
+
+# Clinical logic and legal text get explicit ownership — changes here always
+# request a maintainer review.
+/src/utils/calculations.ts          @yutabee
+/src/screens/DisclaimerScreen.tsx   @yutabee
+/src/screens/PrivacyPolicyScreen.tsx @yutabee
+/src/screens/FormulasScreen.tsx     @yutabee

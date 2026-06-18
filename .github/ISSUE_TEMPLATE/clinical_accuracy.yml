@@ -1,0 +1,48 @@
+name: Clinical accuracy issue
+description: A calculated value (eGFR / CCr / BSA) or CKD stage looks wrong
+labels: ['clinical-accuracy', 'priority']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping keep RenalCalc accurate. If you believe this could
+        mislead clinical use, consider reporting privately first — see
+        [SECURITY.md](https://github.com/yutabee/RenalCalc/blob/main/SECURITY.md).
+  - type: dropdown
+    id: metric
+    attributes:
+      label: Which value is affected?
+      options:
+        - eGFR
+        - CCr
+        - BSA
+        - CKD stage
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Exact inputs
+      description: Age, sex, height, weight, serum creatinine.
+      placeholder: 'age 50, female, 160 cm, 55 kg, S-Cr 0.9 mg/dL'
+    validations:
+      required: true
+  - type: input
+    id: produced
+    attributes:
+      label: Value RenalCalc produced
+    validations:
+      required: true
+  - type: input
+    id: expected
+    attributes:
+      label: Expected value
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Reference source
+      description: Guideline or paper (with link) that defines the expected value.
+    validations:
+      required: true
