@@ -1,0 +1,14 @@
+# gitleaks configuration — extends the default ruleset and allowlists the
+# standard React Native Android debug keystore, whose password "android" is a
+# public, universally-known default (not a real secret).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Standard Android debug keystore defaults (public, benign)"
+paths = [
+  '''android/app/debug\.keystore''',
+]
+regexes = [
+  '''(store|key)Password 'android'''',
+]
