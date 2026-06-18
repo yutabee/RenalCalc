@@ -26,8 +26,7 @@ export function calculateEGFR(
   age: number,
   sex: Sex,
 ): number {
-  const base =
-    194 * Math.pow(serumCreatinine, -1.094) * Math.pow(age, -0.287);
+  const base = 194 * Math.pow(serumCreatinine, -1.094) * Math.pow(age, -0.287);
   return sex === 'female' ? base * 0.739 : base;
 }
 
@@ -101,9 +100,7 @@ export function validateInputs(raw: RawInputs): RenalInputs {
   }
 
   if (serumCreatinine < 0.3 || serumCreatinine > 15) {
-    throw new Error(
-      '血清クレアチニンは0.3-15.0 mg/dLの範囲で入力してください',
-    );
+    throw new Error('血清クレアチニンは0.3-15.0 mg/dLの範囲で入力してください');
   }
 
   return {age, weight, height, serumCreatinine, sex: raw.sex};
