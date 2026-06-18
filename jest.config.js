@@ -1,5 +1,5 @@
 module.exports = {
-  preset: 'react-native',
+  preset: '@react-native/jest-preset',
   setupFiles: ['./jest.setup.js'],
   // The RN preset only transforms react-native core by default; the navigation
   // stack ships untranspiled TS/JSX and image assets, so whitelist it (and the
