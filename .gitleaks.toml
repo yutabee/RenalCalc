@@ -10,5 +10,5 @@ paths = [
   '''android/app/debug\.keystore''',
 ]
 regexes = [
-  '''(store|key)Password 'android'''',
+  "(store|key)Password 'android'",
 ]
