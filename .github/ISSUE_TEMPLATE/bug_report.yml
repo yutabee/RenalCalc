@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a functional bug (crash, wrong UI behavior, build issue)
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a **wrong calculated value or CKD stage**, please use the
+        "Clinical accuracy issue" template (or report privately via SECURITY.md)
+        instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Tap ...
+        3. See ...
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - iOS
+        - Android
+        - Both
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App / OS version
+      placeholder: 'e.g. RenalCalc 1.0.0, iOS 17.5'
+  - type: textarea
+    id: extra
+    attributes:
+      label: Logs / screenshots
