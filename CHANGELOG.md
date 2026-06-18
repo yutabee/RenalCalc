@@ -9,11 +9,16 @@ boundary is treated as significant** and is called out explicitly below.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-06-19
+
 ### Changed
 
 - Restored the iOS bundle identifier to `org.reactjs.native.example.RenalCalc`
-  so updates can continue to ship to the existing App Store listing (an App
-  Store app's bundle identifier is immutable once published).
+  so updates continue to ship to the existing App Store listing (an App Store
+  app's bundle identifier is immutable once published).
+- Bumped the iOS marketing version to 1.0.1 (build 5) and the Android version to
+  1.0.1 (versionCode 2) to resubmit the React Native 0.86 codebase to the App
+  Store as a new version.
 
 ## [1.0.0] - 2026-06-19
 
@@ -55,5 +60,6 @@ First public release.
 
 - All calculations run on-device; no user input is transmitted to any server.
 
-[Unreleased]: https://github.com/yutabee/RenalCalc/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/yutabee/RenalCalc/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/yutabee/RenalCalc/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/yutabee/RenalCalc/releases/tag/v1.0.0
