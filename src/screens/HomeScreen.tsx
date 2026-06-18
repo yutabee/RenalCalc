@@ -15,7 +15,15 @@ import {
 import {ActionButton} from '../components/ActionButton';
 import {ResultCard} from '../components/ResultCard';
 import {InputField} from '../components/InputField';
-import {CKDStage, InputValidation} from '../types/interfaces';
+import type {CKDStage} from '../types/interfaces';
+import {
+  calculateBSA,
+  calculateCCr,
+  calculateEGFR,
+  getCKDStage,
+  validateInputs,
+} from '../utils/calculations';
+import type {CKDStageInfo, Sex} from '../utils/calculations';
 
 const SPACING = {
   xs: 4,
@@ -55,6 +63,20 @@ const COLORS = {
   },
 };
 
+const STAGE_COLORS: Record<CKDStageInfo['stage'], string> = {
+  G1: COLORS.ckdStages.G1,
+  G2: COLORS.ckdStages.G2,
+  G3a: COLORS.ckdStages.G3a,
+  G3b: COLORS.ckdStages.G3b,
+  G4: COLORS.ckdStages.G4,
+  G5: COLORS.ckdStages.G5,
+};
+
+const buildStageDisplay = (egfrValue: number): CKDStage => {
+  const stageInfo = getCKDStage(egfrValue);
+  return {...stageInfo, color: STAGE_COLORS[stageInfo.stage]};
+};
+
 interface HomeScreenProps {
   navigation: any;
 }
@@ -64,95 +86,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [weight, setWeight] = useState<string>('');
   const [height, setHeight] = useState<string>('');
   const [serumCreatinine, setSerumCreatinine] = useState<string>('');
-  const [sex, setSex] = useState<'male' | 'female'>('male');
+  const [sex, setSex] = useState<Sex>('male');
   const [ccr, setCcr] = useState<number | null>(null);
   const [egfr, setEgfr] = useState<number | null>(null);
   const [bsa, setBsa] = useState<number | null>(null);
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  const validateInputs = (): InputValidation => {
-    const ageNum = parseFloat(age);
-    const weightNum = parseFloat(weight);
-    const heightNum = parseFloat(height);
-    const serumCr = parseFloat(serumCreatinine);
-
-    if (!ageNum || !weightNum || !heightNum || !serumCr) {
-      throw new Error('すべての値を入力してください');
-    }
-
-    if (ageNum < 18 || ageNum > 120) {
-      throw new Error('年齢は18-120の範囲で入力してください');
-    }
-
-    if (weightNum < 30 || weightNum > 150) {
-      throw new Error('体重は30-150kgの範囲で入力してください');
-    }
-
-    if (heightNum < 120 || heightNum > 200) {
-      throw new Error('身長は120-200cmの範囲で入力してください');
-    }
-
-    if (serumCr < 0.3 || serumCr > 15) {
-      throw new Error(
-        '血清クレアチニンは0.3-15.0 mg/dLの範囲で入力してください',
-      );
-    }
-
-    return {ageNum, weightNum, heightNum, serumCr};
-  };
-
-  const calculateBSA = (heightCm: number, weightKg: number): number => {
-    return Math.pow(weightKg, 0.444) * Math.pow(heightCm, 0.663) * 0.008883;
-  };
-
-  const calculateCCR = (inputs: InputValidation) => {
-    const {ageNum, weightNum, serumCr} = inputs;
-    let ccrValue = ((140 - ageNum) * weightNum) / (72 * serumCr);
-    if (sex === 'female') {
-      ccrValue *= 0.85;
-    }
-    setCcr(parseFloat(ccrValue.toFixed(1)));
-  };
-
-  const calculateEGFR = (inputs: InputValidation) => {
-    const {ageNum, serumCr} = inputs;
-    const isMale = sex === 'male';
-    const base = 194 * Math.pow(serumCr, -1.094) * Math.pow(ageNum, -0.287);
-    const egfrValue = isMale ? base : base * 0.739;
-    setEgfr(parseFloat(egfrValue.toFixed(1)));
-  };
-
-  const getCKDStage = (egfrValue: number): CKDStage => {
-    if (egfrValue >= 90) {
-      return {
-        stage: 'G1',
-        description: '正常または高値',
-        color: COLORS.ckdStages.G1,
-      };
-    }
-    if (egfrValue >= 60) {
-      return {stage: 'G2', description: '軽度低下', color: COLORS.ckdStages.G2};
-    }
-    if (egfrValue >= 45) {
-      return {
-        stage: 'G3a',
-        description: '軽度～中等度低下',
-        color: COLORS.ckdStages.G3a,
-      };
-    }
-    if (egfrValue >= 30) {
-      return {
-        stage: 'G3b',
-        description: '中等度～高度低下',
-        color: COLORS.ckdStages.G3b,
-      };
-    }
-    if (egfrValue >= 15) {
-      return {stage: 'G4', description: '高度低下', color: COLORS.ckdStages.G4};
-    }
-    return {stage: 'G5', description: '末期腎不全', color: COLORS.ckdStages.G5};
-  };
 
   const handleCalculate = async () => {
     try {
@@ -169,10 +108,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         }),
       ]).start();
 
-      const validatedInputs = validateInputs();
+      const validatedInputs = validateInputs({
+        age,
+        weight,
+        height,
+        serumCreatinine,
+        sex,
+      });
       const bsaValue = calculateBSA(
-        validatedInputs.heightNum,
-        validatedInputs.weightNum,
+        validatedInputs.height,
+        validatedInputs.weight,
       );
       setBsa(parseFloat(bsaValue.toFixed(2)));
 
@@ -180,8 +125,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       setEgfr(null);
 
       await Promise.all([
-        (async () => calculateEGFR(validatedInputs))(),
-        (async () => calculateCCR(validatedInputs))(),
+        (async () => {
+          const egfrValue = calculateEGFR(
+            validatedInputs.serumCreatinine,
+            validatedInputs.age,
+            validatedInputs.sex,
+          );
+          setEgfr(parseFloat(egfrValue.toFixed(1)));
+        })(),
+        (async () => {
+          const ccrValue = calculateCCr(
+            validatedInputs.age,
+            validatedInputs.weight,
+            validatedInputs.serumCreatinine,
+            validatedInputs.sex,
+          );
+          setCcr(parseFloat(ccrValue.toFixed(1)));
+        })(),
       ]);
     } catch (error) {
       if (error instanceof Error) {
@@ -302,7 +262,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                   title="eGFR"
                   value={egfr}
                   unit="mL/min/1.73m²"
-                  stage={getCKDStage(egfr)}
+                  stage={buildStageDisplay(egfr)}
                 />
               )}
               {ccr !== null && (
