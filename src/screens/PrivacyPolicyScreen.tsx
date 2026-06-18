@@ -8,6 +8,7 @@ import {
   Platform,
   Linking,
 } from 'react-native';
+import {CONTACT_EMAIL} from '../constants/contact';
 
 const COLORS = {
   primary: '#1B2B4B',
@@ -56,12 +57,45 @@ const sections: Section[] = [
       '※これらの情報は腎機能評価の計算に使用されますが、外部サーバーに送信されることはなく、デバイス内で処理されます。',
     ],
   },
-  // ... 他のセクションも同様に定義
+  {
+    id: 'purpose',
+    title: '3. 利用目的',
+    content:
+      '取得した情報は、eGFR・CCr・BSA・CKD病期などの腎機能評価指標を算出し、その結果を画面上に表示する目的のみに利用します。これ以外の目的には利用しません。',
+  },
+  {
+    id: 'storage',
+    title: '4. 情報の保存と管理',
+    content: [
+      '入力された情報は計算のために一時的に端末上で処理されるのみで、アプリが外部に送信・保存することはありません。',
+      'アプリを終了すると、入力内容は保持されません（端末やOSのキーボード入力履歴等は本アプリの管理対象外です）。',
+    ],
+  },
+  {
+    id: 'third-party',
+    title: '5. 第三者提供・外部送信',
+    content: [
+      '本アプリは、ユーザーの入力情報を第三者へ提供することはありません。',
+      'また、解析ツール（アクセス解析・クラッシュレポート等）や広告SDKを利用しておらず、利用状況の外部送信も行いません。',
+    ],
+  },
+  {
+    id: 'children',
+    title: '6. 適用対象',
+    content:
+      '本アプリは医療従事者を含む一般の利用者を想定した参考ツールです。算出結果は参考値であり、診断・治療の根拠とはなりません。',
+  },
+  {
+    id: 'changes',
+    title: '7. 本ポリシーの変更',
+    content:
+      '本ポリシーは、機能の改善や関連法令の変更に伴い、予告なく改定する場合があります。重要な変更がある場合はアプリの更新に合わせて本画面で告知します。',
+  },
 ];
 
 const PrivacyPolicyScreen: React.FC = () => {
   const handleEmailPress = () => {
-    Linking.openURL('mailto:yutabeee@gmail.com');
+    Linking.openURL(`mailto:${CONTACT_EMAIL}`);
   };
 
   return (
@@ -106,7 +140,7 @@ const PrivacyPolicyScreen: React.FC = () => {
               本ポリシーに関するお問い合わせは、以下のメールアドレスまでお願いいたします：
             </Text>
             <Text style={styles.email} onPress={handleEmailPress}>
-              yutabeee@gmail.com
+              {CONTACT_EMAIL}
             </Text>
           </View>
 
