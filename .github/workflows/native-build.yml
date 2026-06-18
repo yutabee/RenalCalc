@@ -3,11 +3,8 @@ name: Native build
 # Verifies the app actually compiles natively (catches things the JS test suite
 # cannot, e.g. the package / bundle-identifier rename).
 #
-# Cost control (private repo): Android runs on ubuntu (1x) for every PR that
-# touches native files. iOS runs on macOS (billed at 10x) so it is NOT automatic —
-# trigger it manually with `gh workflow run native-build.yml` (or the Actions UI)
-# when you need an iOS build check. If the repo becomes public, both are free and
-# the iOS `if:` guard below can be relaxed to run on PRs too.
+# The repo is public, so GitHub-hosted runners (incl. macOS) are free — both the
+# Android and iOS builds run automatically on every PR that touches native files.
 
 on:
   pull_request:
@@ -59,8 +56,6 @@ jobs:
 
   ios:
     name: iOS build (no signing)
-    # macOS runners bill at 10x on private repos — manual trigger only.
-    if: github.event_name == 'workflow_dispatch'
     # RN 0.86 requires Xcode >= 16.1; macos-15 ships Xcode 16.x.
     runs-on: macos-15
     steps:
