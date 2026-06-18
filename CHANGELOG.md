@@ -9,6 +9,12 @@ boundary is treated as significant** and is called out explicitly below.
 
 ## [Unreleased]
 
+### Changed
+
+- Restored the iOS bundle identifier to `org.reactjs.native.example.RenalCalc`
+  so updates can continue to ship to the existing App Store listing (an App
+  Store app's bundle identifier is immutable once published).
+
 ## [1.0.0] - 2026-06-19
 
 First public release.
