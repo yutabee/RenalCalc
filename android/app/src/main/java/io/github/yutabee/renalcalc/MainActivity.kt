@@ -1,4 +1,4 @@
-package com.pharmacalc
+package io.github.yutabee.renalcalc
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
