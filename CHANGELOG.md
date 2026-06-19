@@ -16,9 +16,12 @@ boundary is treated as significant** and is called out explicitly below.
 - Restored the iOS bundle identifier to `org.reactjs.native.example.RenalCalc`
   so updates continue to ship to the existing App Store listing (an App Store
   app's bundle identifier is immutable once published).
-- Bumped the iOS marketing version to 1.0.1 (build 5) and the Android version to
+- Bumped the iOS marketing version to 1.0.1 (build 6) and the Android version to
   1.0.1 (versionCode 2) to resubmit the React Native 0.86 codebase to the App
   Store as a new version.
+- Restricted the iOS target to iPhone (`TARGETED_DEVICE_FAMILY = 1`) to match the
+  originally published app; the React Native 0.86 template had defaulted it to
+  universal (iPhone + iPad).
 
 ## [1.0.0] - 2026-06-19
 
