@@ -32,11 +32,11 @@ git tag v1.0.2 && git push origin v1.0.2
 
 Repository → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
 
-| Secret | Value |
-| --- | --- |
-| `ASC_KEY_ID` | the Key ID (e.g. `ABC123XYZ`) |
-| `ASC_ISSUER_ID` | the Issuer ID (a UUID) |
-| `ASC_KEY_P8` | the **entire contents** of the `AuthKey_XXXXXXXXXX.p8` file |
+| Secret          | Value                                                       |
+| --------------- | ----------------------------------------------------------- |
+| `ASC_KEY_ID`    | the Key ID (e.g. `ABC123XYZ`)                               |
+| `ASC_ISSUER_ID` | the Issuer ID (a UUID)                                      |
+| `ASC_KEY_P8`    | the **entire contents** of the `AuthKey_XXXXXXXXXX.p8` file |
 
 The team ID (`WW832FWMK6`) is not secret and is set directly in the workflow.
 
@@ -46,7 +46,7 @@ The team ID (`WW832FWMK6`) is not secret and is set directly in the workflow.
   The version string comes from the tag (`v1.0.2` → `1.0.2`); the build number is
   a UTC timestamp, so it is always unique and increasing without editing the
   Xcode project.
-- **Manual test run:** Actions → *iOS deploy* → **Run workflow** (`workflow_dispatch`).
+- **Manual test run:** Actions → _iOS deploy_ → **Run workflow** (`workflow_dispatch`).
   Uses the project's current `MARKETING_VERSION` for the version string.
 
 After the workflow succeeds, finish in App Store Connect:
