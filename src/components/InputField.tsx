@@ -1,71 +1,83 @@
 import React from 'react';
 import {View, Text, TextInput, StyleSheet, TextInputProps} from 'react-native';
+import {colors, radius, spacing, typography} from '../theme';
 
 interface InputFieldProps extends TextInputProps {
   label: string;
   unit: string;
+  /** Inline validation message shown under the field; also flags the border. */
+  error?: string;
 }
-
-const COLORS = {
-  primary: '#1B2B4B',
-  text: {
-    primary: '#1A1A1A',
-    secondary: '#6B7280',
-    placeholder: '#A0A0A0',
-  },
-  background: '#F5F5F5',
-};
 
 export const InputField: React.FC<InputFieldProps> = ({
   label,
   unit,
+  error,
   ...props
 }) => {
+  const hasError = Boolean(error);
   return (
     <View style={styles.inputGroup}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input}
-          placeholderTextColor={COLORS.text.placeholder}
+          style={[styles.input, hasError && styles.inputError]}
+          placeholderTextColor={colors.text.placeholder}
           keyboardType="numeric"
+          accessibilityLabel={label}
+          accessibilityHint={`単位は${unit}`}
           {...props}
         />
         <Text style={styles.unit}>{unit}</Text>
       </View>
+      {hasError && (
+        <Text style={styles.errorText} accessibilityLiveRegion="polite">
+          {error}
+        </Text>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   label: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.text.primary,
-    marginBottom: 8,
+    ...typography.label,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
   inputContainer: {
     position: 'relative',
   },
   input: {
-    backgroundColor: COLORS.background,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: colors.inputBg,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md - 4,
     fontSize: 17,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     height: 52,
     paddingRight: 48,
   },
+  inputError: {
+    borderColor: colors.danger,
+    backgroundColor: '#FCEDEE',
+  },
   unit: {
     position: 'absolute',
-    right: 16,
+    right: spacing.md,
     top: 16,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     fontSize: 15,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.danger,
+    marginTop: spacing.xs + 2,
   },
 });
 
