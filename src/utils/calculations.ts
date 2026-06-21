@@ -174,3 +174,51 @@ export function validateInputs(raw: RawInputs): RenalInputs {
 
   return {age, weight, height, serumCreatinine, sex: raw.sex};
 }
+
+export type NumericField = 'age' | 'weight' | 'height' | 'serumCreatinine';
+export type InputErrors = Partial<Record<NumericField, string>>;
+
+/**
+ * UI-facing companion to `validateInputs`: instead of throwing on the first bad
+ * field, it returns a per-field map of short messages so the form can show
+ * every error inline at once. Empty map means all inputs are valid. Ranges are
+ * the same physiological bounds enforced by `validateInputs`.
+ */
+export function collectInputErrors(raw: RawInputs): InputErrors {
+  const errors: InputErrors = {};
+
+  const check = (
+    field: NumericField,
+    value: string,
+    min: number,
+    max: number,
+    rangeMessage: string,
+  ) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      errors[field] = '入力してください';
+      return;
+    }
+    const num = Number(trimmed);
+    if (!Number.isFinite(num)) {
+      errors[field] = '数値を入力してください';
+      return;
+    }
+    if (num < min || num > max) {
+      errors[field] = rangeMessage;
+    }
+  };
+
+  check('age', raw.age, 18, 120, '18〜120の範囲で入力してください');
+  check('weight', raw.weight, 30, 150, '30〜150kgの範囲で入力してください');
+  check('height', raw.height, 120, 200, '120〜200cmの範囲で入力してください');
+  check(
+    'serumCreatinine',
+    raw.serumCreatinine,
+    0.3,
+    15,
+    '0.3〜15.0 mg/dLの範囲で入力してください',
+  );
+
+  return errors;
+}

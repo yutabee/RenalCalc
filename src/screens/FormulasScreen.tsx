@@ -9,20 +9,21 @@ import {
   Linking,
   TouchableOpacity,
 } from 'react-native';
+import {colors} from '../theme';
 
 const COLORS = {
-  primary: '#1B2B4B',
-  primaryLight: '#E8ECF4',
-  background: '#F8F9FD',
-  surface: '#FFFFFF',
+  primary: colors.primary,
+  primaryLight: colors.primaryTint,
+  background: colors.background,
+  surface: colors.surface,
   text: {
-    primary: '#1A1A1A',
-    secondary: '#6B7280',
-    accent: '#1B2B4B',
-    highlight: '#2A3F6C',
+    primary: colors.text.primary,
+    secondary: colors.text.secondary,
+    accent: colors.primary,
+    highlight: colors.primaryDark,
   },
-  divider: '#E2E8F0',
-  formula: '#F1F5F9',
+  divider: colors.divider,
+  formula: colors.formula,
 };
 
 interface Formula {
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 14,
-    color: '#0066cc',
+    color: colors.link,
     textDecorationLine: 'underline',
     marginBottom: 8,
   },

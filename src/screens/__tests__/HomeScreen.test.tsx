@@ -4,7 +4,6 @@
  * (which mounted the entire native navigation stack just to assert it rendered).
  */
 import React from 'react';
-import {Alert} from 'react-native';
 import {describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
 import {render, fireEvent, waitFor, act} from '@testing-library/react-native';
 import HomeScreen from '../HomeScreen';
@@ -33,20 +32,15 @@ describe('HomeScreen', () => {
     expect(getByText('計算する')).toBeTruthy();
   });
 
-  it('alerts when calculating with empty inputs', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const {getByText} = renderScreen();
+  it('shows an inline error under every empty field when calculating', () => {
+    const {getByText, getAllByText} = renderScreen();
 
     fireEvent.press(getByText('計算する'));
 
-    expect(alertSpy).toHaveBeenCalledWith(
-      'エラー',
-      'すべての値を入力してください',
-    );
+    expect(getAllByText('入力してください')).toHaveLength(4);
   });
 
-  it('alerts when an input is out of range', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  it('shows an inline range error for an out-of-range input', () => {
     const {getByText, getByPlaceholderText} = renderScreen();
 
     fireEvent.changeText(getByPlaceholderText('18-120'), '10'); // age < 18
@@ -56,10 +50,17 @@ describe('HomeScreen', () => {
 
     fireEvent.press(getByText('計算する'));
 
-    expect(alertSpy).toHaveBeenCalledWith(
-      'エラー',
-      '年齢は18-120の範囲で入力してください',
-    );
+    expect(getByText('18〜120の範囲で入力してください')).toBeTruthy();
+  });
+
+  it('clears a field error once the user edits that field', () => {
+    const {getByText, getByPlaceholderText, queryAllByText} = renderScreen();
+
+    fireEvent.press(getByText('計算する'));
+    expect(queryAllByText('入力してください')).toHaveLength(4);
+
+    fireEvent.changeText(getByPlaceholderText('18-120'), '50');
+    expect(queryAllByText('入力してください')).toHaveLength(3);
   });
 
   it('renders eGFR, CCr and BSA results for valid inputs', async () => {

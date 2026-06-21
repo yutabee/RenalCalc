@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useCallback} from 'react';
 import {View, Text, Animated, StyleSheet} from 'react-native';
+import {colors, readableTextColor} from '../theme';
 
 interface Stage {
   stage: string;
@@ -18,17 +19,13 @@ interface ResultCardProps {
 }
 
 const COLORS = {
-  primary: '#1B2B4B',
-  white: '#FFFFFF',
-  text: {
-    primary: '#1A1A1A',
-    secondary: '#6B7280',
-    light: '#94A3B8',
-  },
-  border: '#E2E8F0',
-  success: '#34C759',
-  warning: '#FF9500',
-  danger: '#FF3B30',
+  primary: colors.primary,
+  white: colors.surface,
+  text: colors.text,
+  border: colors.border,
+  success: colors.success,
+  warning: colors.warning,
+  danger: colors.danger,
 };
 
 export const ResultCard: React.FC<ResultCardProps> = ({
@@ -126,7 +123,13 @@ export const ResultCard: React.FC<ResultCardProps> = ({
         {stage && (
           <View style={styles.stageContainer}>
             <View style={[styles.stageBadge, {backgroundColor: stage.color}]}>
-              <Text style={styles.stageBadgeText}>{stage.stage}</Text>
+              <Text
+                style={[
+                  styles.stageBadgeText,
+                  {color: readableTextColor(stage.color)},
+                ]}>
+                {stage.stage}
+              </Text>
             </View>
             <Text style={styles.stageDescription}>{stage.description}</Text>
           </View>

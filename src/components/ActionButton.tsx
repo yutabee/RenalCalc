@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -8,6 +8,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
+import {colors} from '../theme';
 
 interface ActionButtonProps {
   title: string;
@@ -21,12 +22,12 @@ interface ActionButtonProps {
 }
 
 const COLORS = {
-  primary: '#1B2B4B',
-  primaryLight: '#2A3F6C',
-  white: '#FFFFFF',
+  primary: colors.primary,
+  primaryLight: colors.primaryDark,
+  white: colors.text.onPrimary,
   transparent: 'transparent',
-  disabled: '#E2E8F0',
-  disabledText: '#94A3B8',
+  disabled: colors.border,
+  disabledText: colors.text.placeholder,
 };
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
@@ -39,8 +40,8 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
   size = 'medium',
 }) => {
-  // スケールアニメーション用のAnimated Value
-  const scaleAnimation = new Animated.Value(1);
+  // スケールアニメーション用のAnimated Value（再レンダーで作り直さない）
+  const scaleAnimation = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
     Animated.timing(scaleAnimation, {

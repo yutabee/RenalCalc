@@ -60,4 +60,22 @@ describe('InputField', () => {
       'decimal-pad',
     );
   });
+
+  it('renders an inline error message when error is provided', () => {
+    const {getByText} = render(
+      <InputField
+        label="年齢"
+        unit="歳"
+        error="18〜120の範囲で入力してください"
+      />,
+    );
+
+    expect(getByText('18〜120の範囲で入力してください')).toBeTruthy();
+  });
+
+  it('does not render an error message when error is absent', () => {
+    const {queryByText} = render(<InputField label="年齢" unit="歳" />);
+
+    expect(queryByText('18〜120の範囲で入力してください')).toBeNull();
+  });
 });
