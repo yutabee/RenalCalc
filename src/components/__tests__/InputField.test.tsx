@@ -78,4 +78,25 @@ describe('InputField', () => {
 
     expect(queryByText('18〜120の範囲で入力してください')).toBeNull();
   });
+
+  it('calls through prop-provided onFocus and onBlur handlers', () => {
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    const {getByPlaceholderText} = render(
+      <InputField
+        label="体重"
+        unit="kg"
+        placeholder="30-150"
+        onFocus={onFocus}
+        onBlur={onBlur}
+      />,
+    );
+
+    const input = getByPlaceholderText('30-150');
+    fireEvent(input, 'focus');
+    fireEvent(input, 'blur');
+
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
 });
