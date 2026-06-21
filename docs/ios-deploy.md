@@ -28,9 +28,18 @@ git tag v1.0.2 && git push origin v1.0.2
 3. Note the **Key ID** and the **Issuer ID** (shown above the key list).
 4. **Download the `AuthKey_XXXXXXXXXX.p8` file** — it can only be downloaded once.
 
-### 2. Add three repository secrets
+### 2. Create the `production` environment and add three secrets
 
-Repository → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+The deploy job runs in a protected GitHub Environment named **`production`** so the
+signing secrets are not readable by any other workflow and the upload pauses for a
+human approval before it runs.
+
+1. Repository → **Settings** → **Environments** → **New environment** → name it
+   `production`.
+2. Under **Deployment protection rules**, enable **Required reviewers** and add
+   yourself (and optionally restrict deployment branches/tags to `v*`).
+3. Add the three secrets **to this environment** (not at repository scope) via
+   **Environment secrets** → **Add secret**:
 
 | Secret          | Value                                                       |
 | --------------- | ----------------------------------------------------------- |
@@ -39,6 +48,10 @@ Repository → **Settings** → **Secrets and variables** → **Actions** → **
 | `ASC_KEY_P8`    | the **entire contents** of the `AuthKey_XXXXXXXXXX.p8` file |
 
 The team ID (`WW832FWMK6`) is not secret and is set directly in the workflow.
+
+> A tag push (or `workflow_dispatch`) starts the build, but the job waits at the
+> `production` environment gate until a required reviewer approves it — so even an
+> unintended tag cannot upload to App Store Connect without a human in the loop.
 
 ## Releasing
 
