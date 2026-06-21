@@ -10,6 +10,7 @@ import {
   calculateBSA,
   getCKDStage,
   validateInputs,
+  collectInputErrors,
 } from '../calculations';
 
 describe('calculateEGFR (JSN equation)', () => {
@@ -136,5 +137,59 @@ describe('validateInputs', () => {
     expect(() => validateInputs({...valid, serumCreatinine: '15.1'})).toThrow(
       '血清クレアチニンは0.3-15.0 mg/dLの範囲で入力してください',
     );
+  });
+});
+
+describe('collectInputErrors', () => {
+  const valid = {
+    age: '50',
+    weight: '60',
+    height: '170',
+    serumCreatinine: '1.0',
+    sex: 'male' as const,
+  };
+
+  it('returns an empty map for valid inputs', () => {
+    expect(collectInputErrors(valid)).toEqual({});
+  });
+
+  it('flags every empty field at once', () => {
+    expect(
+      collectInputErrors({
+        age: '',
+        weight: '',
+        height: '',
+        serumCreatinine: '',
+        sex: 'male',
+      }),
+    ).toEqual({
+      age: '入力してください',
+      weight: '入力してください',
+      height: '入力してください',
+      serumCreatinine: '入力してください',
+    });
+  });
+
+  it('flags non-numeric input', () => {
+    expect(collectInputErrors({...valid, age: '12abc'})).toEqual({
+      age: '数値を入力してください',
+    });
+  });
+
+  it('flags only the out-of-range field', () => {
+    expect(collectInputErrors({...valid, age: '10'})).toEqual({
+      age: '18〜120の範囲で入力してください',
+    });
+  });
+
+  it('reports multiple distinct errors together', () => {
+    const errors = collectInputErrors({
+      ...valid,
+      weight: '200',
+      serumCreatinine: '',
+    });
+    expect(errors.weight).toBe('30〜150kgの範囲で入力してください');
+    expect(errors.serumCreatinine).toBe('入力してください');
+    expect(errors.age).toBeUndefined();
   });
 });
