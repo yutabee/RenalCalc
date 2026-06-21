@@ -5,7 +5,7 @@ import {
   ScrollView,
   Text,
   Animated,
-  Alert,
+  Keyboard,
   TouchableOpacity,
   Platform,
   View,
@@ -16,22 +16,16 @@ import {ActionButton} from '../components/ActionButton';
 import {ResultCard} from '../components/ResultCard';
 import {InputField} from '../components/InputField';
 import type {CKDStage} from '../types/interfaces';
+import {colors, spacing as SPACING} from '../theme';
 import {
   calculateBSA,
   calculateCCr,
   calculateEGFR,
   getCKDStage,
   validateInputs,
+  collectInputErrors,
 } from '../utils/calculations';
-import type {CKDStageInfo, Sex} from '../utils/calculations';
-
-const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 20,
-  xl: 24,
-};
+import type {CKDStageInfo, InputErrors, Sex} from '../utils/calculations';
 
 const FONTSIZE = {
   xs: 12,
@@ -42,26 +36,7 @@ const FONTSIZE = {
   xxl: 28,
 };
 
-const COLORS = {
-  primary: '#1B2B4B',
-  primaryLight: '#E8ECF4',
-  background: '#F8F9FD',
-  surface: '#FFFFFF',
-  text: {
-    primary: '#1A1A1A',
-    secondary: '#6B7280',
-    placeholder: '#A0A0A0',
-  },
-  border: '#E2E8F0',
-  ckdStages: {
-    G1: '#4CAF50',
-    G2: '#8BC34A',
-    G3a: '#FFC107',
-    G3b: '#FF9800',
-    G4: '#FF5722',
-    G5: '#F44336',
-  },
-};
+const COLORS = {...colors, primaryLight: colors.primaryTint};
 
 const STAGE_COLORS: Record<CKDStageInfo['stage'], string> = {
   G1: COLORS.ckdStages.G1,
@@ -90,64 +65,75 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [ccr, setCcr] = useState<number | null>(null);
   const [egfr, setEgfr] = useState<number | null>(null);
   const [bsa, setBsa] = useState<number | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<InputErrors>({});
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const scrollRef = useRef<ScrollView>(null);
 
-  const handleCalculate = async () => {
-    try {
-      Animated.sequence([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      const validatedInputs = validateInputs({
-        age,
-        weight,
-        height,
-        serumCreatinine,
-        sex,
-      });
-      const bsaValue = calculateBSA(
-        validatedInputs.height,
-        validatedInputs.weight,
+  // Update a field and clear its inline error as soon as the user edits it.
+  const makeChangeHandler =
+    (setter: (v: string) => void, field: keyof InputErrors) =>
+    (text: string) => {
+      setter(text);
+      setFieldErrors(prev =>
+        prev[field] ? {...prev, [field]: undefined} : prev,
       );
-      setBsa(parseFloat(bsaValue.toFixed(2)));
+    };
 
-      setCcr(null);
+  const handleCalculate = () => {
+    Keyboard.dismiss();
+
+    const errors = collectInputErrors({
+      age,
+      weight,
+      height,
+      serumCreatinine,
+      sex,
+    });
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       setEgfr(null);
-
-      await Promise.all([
-        (async () => {
-          const egfrValue = calculateEGFR(
-            validatedInputs.serumCreatinine,
-            validatedInputs.age,
-            validatedInputs.sex,
-          );
-          setEgfr(parseFloat(egfrValue.toFixed(1)));
-        })(),
-        (async () => {
-          const ccrValue = calculateCCr(
-            validatedInputs.age,
-            validatedInputs.weight,
-            validatedInputs.serumCreatinine,
-            validatedInputs.sex,
-          );
-          setCcr(parseFloat(ccrValue.toFixed(1)));
-        })(),
-      ]);
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert('エラー', error.message);
-      }
+      setCcr(null);
+      setBsa(null);
+      return;
     }
+
+    Animated.sequence([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    const inputs = validateInputs({age, weight, height, serumCreatinine, sex});
+    const bsaValue = calculateBSA(inputs.height, inputs.weight);
+    const egfrValue = calculateEGFR(
+      inputs.serumCreatinine,
+      inputs.age,
+      inputs.sex,
+    );
+    const ccrValue = calculateCCr(
+      inputs.age,
+      inputs.weight,
+      inputs.serumCreatinine,
+      inputs.sex,
+    );
+
+    setBsa(parseFloat(bsaValue.toFixed(2)));
+    setEgfr(parseFloat(egfrValue.toFixed(1)));
+    setCcr(parseFloat(ccrValue.toFixed(1)));
+
+    // Bring the freshly rendered results into view.
+    requestAnimationFrame(() =>
+      scrollRef.current?.scrollToEnd?.({animated: true}),
+    );
   };
 
   const showResults = egfr !== null || ccr !== null || bsa !== null;
@@ -158,7 +144,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoid}>
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
           {/* ヘッダーセクション */}
           <View style={styles.header}>
@@ -211,35 +200,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             <InputField
               label="年齢"
               value={age}
-              onChangeText={setAge}
+              onChangeText={makeChangeHandler(setAge, 'age')}
               placeholder="18-120"
               unit="歳"
               maxLength={3}
+              error={fieldErrors.age}
             />
             <InputField
               label="身長"
               value={height}
-              onChangeText={setHeight}
+              onChangeText={makeChangeHandler(setHeight, 'height')}
               placeholder="120-200"
               unit="cm"
               maxLength={3}
+              error={fieldErrors.height}
             />
             <InputField
               label="体重"
               value={weight}
-              onChangeText={setWeight}
+              onChangeText={makeChangeHandler(setWeight, 'weight')}
               placeholder="30-150"
               unit="kg"
               maxLength={3}
+              error={fieldErrors.weight}
             />
             <InputField
               label="血清クレアチニン"
               value={serumCreatinine}
-              onChangeText={setSerumCreatinine}
+              onChangeText={makeChangeHandler(
+                setSerumCreatinine,
+                'serumCreatinine',
+              )}
               placeholder="0.3-15.0"
               unit="mg/dL"
               maxLength={5}
               keyboardType="decimal-pad"
+              error={fieldErrors.serumCreatinine}
             />
           </View>
 
@@ -269,10 +265,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                 <ResultCard title="CCr" value={ccr} unit="mL/min" />
               )}
               {bsa !== null && (
-                <View style={styles.bsaCard}>
-                  <Text style={styles.bsaValue}>体表面積: {bsa} m²</Text>
-                  <Text style={styles.bsaNote}>（藤本式）</Text>
-                </View>
+                <ResultCard
+                  title="体表面積 (BSA)"
+                  value={bsa}
+                  unit="m²"
+                  description="藤本式"
+                />
               )}
             </Animated.View>
           )}
@@ -401,33 +399,6 @@ const styles = StyleSheet.create({
     color: COLORS.text.primary,
     marginBottom: SPACING.lg,
   },
-  bsaCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: SPACING.lg,
-    alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  bsaValue: {
-    fontSize: FONTSIZE.xl,
-    fontWeight: '700' as TextStyle['fontWeight'],
-    color: COLORS.primary,
-  },
-  bsaNote: {
-    fontSize: FONTSIZE.sm,
-    color: COLORS.text.secondary,
-    marginTop: SPACING.xs,
-  },
   footer: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
@@ -443,7 +414,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   legalButton: {
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.md,
   },
   legalButtonText: {
@@ -464,7 +435,6 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
     textAlign: 'center',
     lineHeight: 18,
-    opacity: 0.8,
   },
 });
 
