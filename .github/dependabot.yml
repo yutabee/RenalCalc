@@ -8,6 +8,12 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+    ignore:
+      # ESLint v10 requires a flat-config + plugin set newer than what
+      # @react-native/eslint-config 0.86 supports (peer eslint ^8 || ^9,
+      # ft-flow pinned to v2). Hold at v9 until RN's config supports v10.
+      - dependency-name: eslint
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
