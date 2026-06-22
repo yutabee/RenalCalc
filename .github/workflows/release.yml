@@ -19,6 +19,8 @@ on:
 
 permissions:
   contents: write # create the GitHub Release
+  id-token: write # mint OIDC token for build-provenance attestation
+  attestations: write # write the build-provenance attestation
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -65,6 +67,9 @@ jobs:
               echo "ORG_GRADLE_PROJECT_MYAPP_UPLOAD_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
             } >> "$GITHUB_ENV"
             echo "::notice::Building a release APK signed with the upload keystore."
+          elif [ "${GITHUB_REF#refs/tags/}" != "$GITHUB_REF" ]; then
+            echo "::error::No ANDROID_KEYSTORE_BASE64 secret set on a tag build — refusing to publish a DEBUG-signed APK as a Release."
+            exit 1
           else
             echo "::warning::No ANDROID_KEYSTORE_BASE64 secret set — building a DEBUG-signed APK (not for store upload)."
           fi
@@ -75,16 +80,31 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
+      - name: Generate SHA256 checksums
+        run: |
+          cd android/app/build/outputs/apk/release
+          sha256sum *.apk > SHA256SUMS
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: renalcalc-release-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/release/SHA256SUMS
           if-no-files-found: error
+
+      - name: Attest build provenance
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: android/app/build/outputs/apk/release/*.apk
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           generate_release_notes: true
-          files: android/app/build/outputs/apk/release/*.apk
+          files: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/release/SHA256SUMS

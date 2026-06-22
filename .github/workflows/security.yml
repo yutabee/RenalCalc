@@ -27,9 +27,18 @@ jobs:
         env:
           GITLEAKS_VERSION: 8.21.2
         run: |
-          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
-            | tar -xz -C /tmp gitleaks
-          sudo install /tmp/gitleaks /usr/local/bin/gitleaks
+          set -euo pipefail
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          checksums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          workdir="$(mktemp -d)"
+          curl -sSfL "${base}/${tarball}" -o "${workdir}/${tarball}"
+          curl -sSfL "${base}/${checksums}" -o "${workdir}/${checksums}"
+          # Verify the tarball's sha256 BEFORE extracting; fail closed on mismatch.
+          grep " ${tarball}\$" "${workdir}/${checksums}" > "${workdir}/${tarball}.sha256"
+          ( cd "${workdir}" && sha256sum -c "${tarball}.sha256" )
+          tar -xz -C "${workdir}" -f "${workdir}/${tarball}" gitleaks
+          sudo install "${workdir}/gitleaks" /usr/local/bin/gitleaks
 
       - name: Scan for secrets
         run: gitleaks detect --source . --redact --verbose --no-banner

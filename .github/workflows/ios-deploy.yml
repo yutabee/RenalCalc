@@ -30,16 +30,21 @@ jobs:
     name: Build, sign & upload to App Store Connect
     # RN 0.86 requires Xcode >= 16.1; macos-15 ships Xcode 16.x.
     runs-on: macos-15
-    # Gate access to the signing secrets behind a protected environment: the
-    # job pauses here until a required reviewer approves, even when triggered by
-    # a tag push or workflow_dispatch. Secrets (ASC_*) live on this environment,
-    # not at repo scope, so no other workflow can read them. See docs/ios-deploy.md.
+    # Gate the signing job behind a protected environment: it pauses here until a
+    # required reviewer approves, even on a tag push or workflow_dispatch. The
+    # ASC_* secrets are stored as `production` ENVIRONMENT secrets (not repo
+    # scope), so ONLY this gated job can read the signing key — no other workflow
+    # in the repo can. See docs/ios-deploy.md.
     environment: production
     env:
       DEVELOPMENT_TEAM: WW832FWMK6
       SCHEME: RenalCalc
       WORKSPACE: ios/RenalCalc.xcworkspace
       KEY_DIR: ${{ github.workspace }}/private_keys
+      # Fail 'bundle install' if Gemfile.lock is out of date instead of silently
+      # re-resolving to un-pinned gem versions (supply-chain integrity for the
+      # CocoaPods/fastlane toolchain).
+      BUNDLE_FROZEN: 'true'
     steps:
       - name: Verify required secrets are present
         env:
@@ -109,6 +114,10 @@ jobs:
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          # Passed via env (not inlined into the script) so the tag-derived
+          # version string can never be interpreted as shell.
+          VERSION: ${{ steps.ver.outputs.version }}
+          BUILD: ${{ steps.ver.outputs.build }}
         run: |
           set -o pipefail
           xcodebuild archive \
@@ -123,8 +132,8 @@ jobs:
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
             CODE_SIGN_STYLE=Automatic \
-            MARKETING_VERSION="${{ steps.ver.outputs.version }}" \
-            CURRENT_PROJECT_VERSION="${{ steps.ver.outputs.build }}"
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="$BUILD"
 
       - name: Create ExportOptions.plist
         run: |
@@ -161,13 +170,15 @@ jobs:
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          BUILD: ${{ steps.ver.outputs.build }}
         run: |
           xcrun altool --upload-app \
             -f "$RUNNER_TEMP/export/RenalCalc.ipa" \
             -t ios \
             --apiKey "$ASC_KEY_ID" \
             --apiIssuer "$ASC_ISSUER_ID"
-          echo "::notice::Uploaded ${{ steps.ver.outputs.version }} (build ${{ steps.ver.outputs.build }}). Submit for review manually in App Store Connect."
+          echo "::notice::Uploaded $VERSION (build $BUILD). Submit for review manually in App Store Connect."
 
       - name: Clean up API key
         if: always()
