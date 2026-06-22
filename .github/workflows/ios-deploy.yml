@@ -30,10 +30,12 @@ jobs:
     name: Build, sign & upload to App Store Connect
     # RN 0.86 requires Xcode >= 16.1; macos-15 ships Xcode 16.x.
     runs-on: macos-15
-    # Gate access to the signing secrets behind a protected environment: the
-    # job pauses here until a required reviewer approves, even when triggered by
-    # a tag push or workflow_dispatch. Secrets (ASC_*) live on this environment,
-    # not at repo scope, so no other workflow can read them. See docs/ios-deploy.md.
+    # Gate the signing job behind a protected environment: it pauses here until a
+    # required reviewer approves, even on a tag push or workflow_dispatch.
+    # NOTE: for the key to also be ISOLATED (unreadable by other workflows), the
+    # ASC_* secrets must be stored as `production` ENVIRONMENT secrets, not at
+    # repo scope. Until that migration is done the reviewer pause is the only
+    # control this gate adds. See docs/ios-deploy.md.
     environment: production
     env:
       DEVELOPMENT_TEAM: WW832FWMK6
@@ -43,7 +45,7 @@ jobs:
       # Fail 'bundle install' if Gemfile.lock is out of date instead of silently
       # re-resolving to un-pinned gem versions (supply-chain integrity for the
       # CocoaPods/fastlane toolchain).
-      BUNDLE_FROZEN: "true"
+      BUNDLE_FROZEN: 'true'
     steps:
       - name: Verify required secrets are present
         env:
