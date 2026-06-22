@@ -31,11 +31,10 @@ jobs:
     # RN 0.86 requires Xcode >= 16.1; macos-15 ships Xcode 16.x.
     runs-on: macos-15
     # Gate the signing job behind a protected environment: it pauses here until a
-    # required reviewer approves, even on a tag push or workflow_dispatch.
-    # NOTE: for the key to also be ISOLATED (unreadable by other workflows), the
-    # ASC_* secrets must be stored as `production` ENVIRONMENT secrets, not at
-    # repo scope. Until that migration is done the reviewer pause is the only
-    # control this gate adds. See docs/ios-deploy.md.
+    # required reviewer approves, even on a tag push or workflow_dispatch. The
+    # ASC_* secrets are stored as `production` ENVIRONMENT secrets (not repo
+    # scope), so ONLY this gated job can read the signing key — no other workflow
+    # in the repo can. See docs/ios-deploy.md.
     environment: production
     env:
       DEVELOPMENT_TEAM: WW832FWMK6
