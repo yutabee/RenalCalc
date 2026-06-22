@@ -8,11 +8,30 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+        # Only batch low-risk minor/patch updates. Majors arrive as individual
+        # PRs so each can be reviewed (and the toolchain ones below are held).
+        update-types: ['minor', 'patch']
     ignore:
-      # ESLint v10 requires a flat-config + plugin set newer than what
-      # @react-native/eslint-config 0.86 supports (peer eslint ^8 || ^9,
-      # ft-flow pinned to v2). Hold at v9 until RN's config supports v10.
+      # These dev-tooling packages are pinned to React Native 0.86's toolchain:
+      # @react-native/babel-preset depends on @babel/* ^7, @react-native/jest-preset
+      # on jest/babel-jest ^29, RN ships with CLI 15.x, and @react-native/eslint-config
+      # supports eslint ^8||^9 (ft-flow v2). Bumping any of these to the next major
+      # ahead of an RN upgrade breaks the build/tests, so hold majors until RN moves.
       - dependency-name: eslint
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@babel/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: jest
+        update-types: ['version-update:semver-major']
+      - dependency-name: babel-jest
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@react-native-community/cli*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@testing-library/react-native'
+        update-types: ['version-update:semver-major']
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+      - dependency-name: prettier
         update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
