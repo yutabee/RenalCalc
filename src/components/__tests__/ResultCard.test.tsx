@@ -1,7 +1,9 @@
 import React from 'react';
+import {StyleSheet} from 'react-native';
 import {describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
 import {render, act} from '@testing-library/react-native';
 import {ResultCard} from '../ResultCard';
+import {colors, stageColors, readableTextColor} from '../../theme';
 
 describe('ResultCard', () => {
   beforeEach(() => {
@@ -27,18 +29,22 @@ describe('ResultCard', () => {
     expect(getByText('mL/min/1.73m²')).toBeTruthy();
   });
 
-  it('renders the stage badge and description when stage is provided', () => {
+  it('renders the stage badge and description with AA badge text on a real ramp hue', () => {
     const {getByText} = render(
       <ResultCard
         title="eGFR"
         value={63.1}
         unit="mL/min/1.73m²"
-        stage={{stage: 'G2', description: '軽度低下', color: '#8BC34A'}}
+        stage={{stage: 'G2', description: '軽度低下', color: stageColors.G2}}
       />,
     );
 
     expect(getByText('G2')).toBeTruthy();
     expect(getByText('軽度低下')).toBeTruthy();
+    // Badge text colour is chosen for contrast — every ramp hue resolves to white.
+    const badgeStyle = StyleSheet.flatten(getByText('G2').props.style);
+    expect(badgeStyle.color).toBe(readableTextColor(stageColors.G2));
+    expect(badgeStyle.color).toBe(colors.text.onPrimary);
   });
 
   it('does not render a stage description without a stage prop', () => {
@@ -47,39 +53,5 @@ describe('ResultCard', () => {
     );
 
     expect(queryByText('軽度低下')).toBeNull();
-  });
-
-  it('renders the up trend arrow', () => {
-    const {getByText} = render(
-      <ResultCard title="eGFR" value={63.1} unit="mL/min/1.73m²" trend="up" />,
-    );
-
-    expect(getByText('↑')).toBeTruthy();
-  });
-
-  it('renders the down trend arrow', () => {
-    const {getByText} = render(
-      <ResultCard
-        title="eGFR"
-        value={63.1}
-        unit="mL/min/1.73m²"
-        trend="down"
-      />,
-    );
-
-    expect(getByText('↓')).toBeTruthy();
-  });
-
-  it('renders the stable trend arrow', () => {
-    const {getByText} = render(
-      <ResultCard
-        title="eGFR"
-        value={63.1}
-        unit="mL/min/1.73m²"
-        trend="stable"
-      />,
-    );
-
-    expect(getByText('→')).toBeTruthy();
   });
 });

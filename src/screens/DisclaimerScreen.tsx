@@ -1,25 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  SafeAreaView,
-  Platform,
-} from 'react-native';
+import {View, Text, ScrollView, StyleSheet, SafeAreaView} from 'react-native';
 import {CONTACT_EMAIL} from '../constants/contact';
-
-const COLORS = {
-  primary: '#1B2B4B',
-  background: '#F8F9FD',
-  surface: '#FFFFFF',
-  text: {
-    primary: '#1A1A1A',
-    secondary: '#6B7280',
-    accent: '#1B2B4B',
-  },
-  divider: '#E2E8F0',
-};
+import {colors, spacing, typography} from '../theme';
 
 interface Section {
   title: string;
@@ -114,52 +96,38 @@ const DisclaimerScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 32,
+    paddingBottom: spacing.xxxl,
   },
   header: {
-    backgroundColor: COLORS.surface,
-    padding: 24,
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: COLORS.text.primary,
-    marginBottom: 16,
-    letterSpacing: 0.5,
+    ...typography.h1,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   subtitle: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: COLORS.text.secondary,
-    fontWeight: '400',
+    ...typography.body,
+    color: colors.text.secondary,
   },
   content: {
-    padding: 24,
+    padding: spacing.gutter,
   },
   section: {
-    marginBottom: 32,
-    paddingBottom: 32,
+    marginBottom: spacing.xxxl,
+    paddingBottom: spacing.xxxl,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    borderBottomColor: colors.divider,
   },
   lastSection: {
     marginBottom: 0,
@@ -167,23 +135,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text.accent,
-    marginBottom: 16,
+    ...typography.h2,
+    color: colors.text.primary,
+    marginBottom: spacing.lg,
   },
   paragraph: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: COLORS.text.secondary,
-    marginBottom: 12,
+    ...typography.body,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   updateDate: {
-    fontSize: 13,
-    color: COLORS.text.secondary,
+    ...typography.caption,
+    color: colors.text.tertiary,
     textAlign: 'center',
-    marginTop: 24,
-    fontWeight: '400',
+    marginTop: spacing.xxl,
   },
 });
 

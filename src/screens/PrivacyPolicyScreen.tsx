@@ -5,23 +5,17 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
-  Platform,
   Linking,
 } from 'react-native';
 import {CONTACT_EMAIL} from '../constants/contact';
-
-const COLORS = {
-  primary: '#1B2B4B',
-  background: '#F8F9FD',
-  surface: '#FFFFFF',
-  text: {
-    primary: '#1A1A1A',
-    secondary: '#6B7280',
-    accent: '#1B2B4B',
-  },
-  divider: '#E2E8F0',
-  highlight: '#F1F5F9',
-};
+import {
+  colors,
+  spacing,
+  radius,
+  typography,
+  hairline,
+  cardShadow,
+} from '../theme';
 
 interface Section {
   id: string;
@@ -154,100 +148,76 @@ const PrivacyPolicyScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 32,
+    paddingBottom: spacing.xxxl,
   },
   header: {
-    backgroundColor: COLORS.surface,
-    padding: 24,
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: COLORS.text.primary,
-    letterSpacing: 0.5,
+    ...typography.h1,
+    color: colors.text.primary,
   },
   content: {
-    padding: 20,
+    padding: spacing.gutter,
   },
   section: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    backgroundColor: colors.surface,
+    ...hairline,
+    borderRadius: radius.lg,
+    padding: spacing.card,
+    marginBottom: spacing.lg,
+    ...cardShadow,
   },
   highlightSection: {
-    backgroundColor: COLORS.highlight,
-    borderWidth: 1,
-    borderColor: COLORS.divider,
+    backgroundColor: colors.inputBg,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text.accent,
-    marginBottom: 12,
+    ...typography.h2,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   paragraph: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: COLORS.text.secondary,
-    marginBottom: 12,
+    ...typography.body,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   bulletPoint: {
-    paddingLeft: 8,
+    paddingLeft: spacing.sm,
   },
   contact: {
-    marginTop: 24,
-    marginBottom: 16,
+    marginTop: spacing.xxl,
+    marginBottom: spacing.lg,
     alignItems: 'center',
   },
   contactText: {
-    fontSize: 15,
-    color: COLORS.text.secondary,
+    ...typography.body,
+    color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   email: {
-    fontSize: 16,
-    color: COLORS.text.accent,
+    ...typography.body,
+    color: colors.link,
     fontWeight: '500',
     textDecorationLine: 'underline',
-    padding: 8,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   updateDate: {
-    fontSize: 13,
-    color: COLORS.text.secondary,
+    ...typography.caption,
+    color: colors.text.tertiary,
     textAlign: 'center',
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
 });
 

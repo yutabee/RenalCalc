@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -8,7 +8,8 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import {colors} from '../theme';
+import {colors, radius, spacing, raisedShadow} from '../theme';
+import {useReducedMotion} from '../hooks/useReducedMotion';
 
 interface ActionButtonProps {
   title: string;
@@ -20,15 +21,6 @@ interface ActionButtonProps {
   icon?: React.ReactNode;
   size?: 'small' | 'medium' | 'large';
 }
-
-const COLORS = {
-  primary: colors.primary,
-  primaryLight: colors.primaryDark,
-  white: colors.text.onPrimary,
-  transparent: 'transparent',
-  disabled: colors.border,
-  disabledText: colors.text.placeholder,
-};
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
   title,
@@ -42,10 +34,17 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 }) => {
   // スケールアニメーション用のAnimated Value（再レンダーで作り直さない）
   const scaleAnimation = useRef(new Animated.Value(1)).current;
+  // 押下時の塗り（pressed fill）をスケールと同時に駆動するためのフラグ
+  const [pressed, setPressed] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   const handlePressIn = () => {
+    setPressed(true);
+    if (reduceMotion) {
+      return;
+    }
     Animated.timing(scaleAnimation, {
-      toValue: 0.95,
+      toValue: 0.96,
       duration: 150,
       easing: Easing.ease,
       useNativeDriver: true,
@@ -53,6 +52,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   };
 
   const handlePressOut = () => {
+    setPressed(false);
+    if (reduceMotion) {
+      return;
+    }
     Animated.timing(scaleAnimation, {
       toValue: 1,
       duration: 150,
@@ -67,6 +70,14 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     variant === 'primary' && styles.primaryButton,
     variant === 'secondary' && styles.secondaryButton,
     variant === 'tertiary' && styles.tertiaryButton,
+    pressed &&
+      !disabled &&
+      variant === 'primary' &&
+      styles.primaryButtonPressed,
+    pressed &&
+      !disabled &&
+      variant === 'secondary' &&
+      styles.secondaryButtonPressed,
     disabled && styles.disabledButton,
     backgroundColor && {backgroundColor},
   ];
@@ -99,7 +110,9 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         }}>
         {loading ? (
           <ActivityIndicator
-            color={variant === 'primary' ? COLORS.white : COLORS.primary}
+            color={
+              variant === 'primary' ? colors.text.onPrimary : colors.primary
+            }
             size="small"
           />
         ) : (
@@ -115,15 +128,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 16,
+    borderRadius: radius.md,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    shadowColor: COLORS.primary,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   contentContainer: {
     flexDirection: 'row',
@@ -131,34 +139,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconContainer: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   // サイズバリエーション
   small: {
-    height: 40,
-    paddingHorizontal: 16,
+    minHeight: 44, // keep the public component's tap target >= 44pt
+    paddingHorizontal: spacing.lg,
   },
   medium: {
-    height: 56,
-    paddingHorizontal: 24,
+    height: 52,
+    paddingHorizontal: spacing.xxl,
   },
   large: {
     height: 64,
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing.xxxl,
   },
   // バリアントスタイル
   primaryButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
+    ...raisedShadow,
+  },
+  primaryButtonPressed: {
+    backgroundColor: colors.primaryPressed,
   },
   secondaryButton: {
-    backgroundColor: COLORS.transparent,
-    borderWidth: 2,
-    borderColor: COLORS.primary,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  secondaryButtonPressed: {
+    backgroundColor: colors.inputBg,
   },
   tertiaryButton: {
-    backgroundColor: COLORS.transparent,
-    shadowColor: 'transparent',
-    elevation: 0,
+    backgroundColor: 'transparent',
   },
   // テキストスタイル
   text: {
@@ -175,23 +188,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   primaryText: {
-    color: COLORS.white,
+    color: colors.text.onPrimary,
   },
   secondaryText: {
-    color: COLORS.primary,
+    color: colors.primary,
   },
   tertiaryText: {
-    color: COLORS.primary,
+    color: colors.primary,
   },
   // 無効化状態
   disabledButton: {
-    backgroundColor: COLORS.disabled,
-    borderColor: COLORS.disabled,
+    backgroundColor: colors.inputBg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    // 沈んだ無効状態：影は出さない（primary の raisedShadow を打ち消す）
     shadowOpacity: 0,
     elevation: 0,
   },
   disabledText: {
-    color: COLORS.disabledText,
+    color: colors.text.tertiary,
   },
 });
 

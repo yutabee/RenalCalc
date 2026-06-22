@@ -9,22 +9,15 @@ import {
   Linking,
   TouchableOpacity,
 } from 'react-native';
-import {colors} from '../theme';
-
-const COLORS = {
-  primary: colors.primary,
-  primaryLight: colors.primaryTint,
-  background: colors.background,
-  surface: colors.surface,
-  text: {
-    primary: colors.text.primary,
-    secondary: colors.text.secondary,
-    accent: colors.primary,
-    highlight: colors.primaryDark,
-  },
-  divider: colors.divider,
-  formula: colors.formula,
-};
+import {
+  colors,
+  spacing,
+  radius,
+  typography,
+  hairline,
+  cardShadow,
+  stageColors,
+} from '../theme';
 
 interface Formula {
   title: string;
@@ -77,7 +70,13 @@ const formulaList: Formula[] = [
   },
 ];
 
-const stages = [
+interface Stage {
+  stage: 'G1' | 'G2' | 'G3a' | 'G3b' | 'G4' | 'G5';
+  range: string;
+  description: string;
+}
+
+const stages: Stage[] = [
   {stage: 'G1', range: '≥ 90', description: '正常または高値'},
   {stage: 'G2', range: '60-89', description: '軽度低下'},
   {stage: 'G3a', range: '45-59', description: '軽度～中等度低下'},
@@ -126,7 +125,10 @@ const FormulaSection: React.FC<Formula> = ({
 );
 
 const LinkText: React.FC<{href: string; text: string}> = ({href, text}) => (
-  <TouchableOpacity onPress={() => Linking.openURL(href)}>
+  <TouchableOpacity
+    onPress={() => Linking.openURL(href)}
+    accessibilityRole="link"
+    accessibilityLabel={text}>
     <Text style={styles.linkText}>{text}</Text>
   </TouchableOpacity>
 );
@@ -138,6 +140,7 @@ const FormulasScreen: React.FC = () => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <Text style={styles.eyebrow}>リファレンス</Text>
           <Text style={styles.title}>計算式一覧</Text>
           <Text style={styles.introText}>
             本アプリは腎機能評価に用いる計算式を提供しています。計算結果はあくまで参考値であり、医学的アドバイス、診断、治療を目的とするものではありません。
@@ -154,12 +157,34 @@ const FormulasScreen: React.FC = () => {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>CKD重症度分類（Gステージ）</Text>
-            <View style={styles.stageGrid}>
+            <View style={styles.stageTable}>
+              <View style={styles.stageHeaderRow}>
+                <Text style={[styles.stageHeaderCell, styles.stageColStage]}>
+                  ステージ
+                </Text>
+                <Text style={[styles.stageHeaderCell, styles.stageColRange]}>
+                  GFR
+                </Text>
+                <Text style={[styles.stageHeaderCell, styles.stageColDesc]}>
+                  状態
+                </Text>
+              </View>
               {stages.map((item, index) => (
                 <View key={index} style={styles.stageRow}>
-                  <Text style={styles.stageCell}>{item.stage}</Text>
-                  <Text style={styles.stageCell}>{item.range}</Text>
-                  <Text style={styles.stageCellDescription}>
+                  <View
+                    style={[
+                      styles.stageRail,
+                      {backgroundColor: stageColors[item.stage]},
+                    ]}
+                  />
+                  <Text style={[styles.stageCell, styles.stageColStage]}>
+                    {item.stage}
+                  </Text>
+                  <Text style={[styles.stageRange, styles.stageColRange]}>
+                    {item.range}
+                  </Text>
+                  <Text
+                    style={[styles.stageCellDescription, styles.stageColDesc]}>
                     {item.description}
                   </Text>
                 </View>
@@ -185,8 +210,7 @@ const FormulasScreen: React.FC = () => {
               以下は本アプリで用いた計算式の出典元リンクです。詳細な計算根拠や最新ガイドラインは各リンク先をご確認ください。
             </Text>
 
-            {/* ここでインラインスタイルを用いていた箇所を修正 */}
-            <View style={styles.marginTop16}>
+            <View style={styles.referenceList}>
               <Text style={styles.subtitle}>eGFR (日本腎臓学会推奨式)</Text>
               <LinkText
                 href="https://cdn.jsn.or.jp/data/CKD2018.pdf"
@@ -215,140 +239,167 @@ const FormulasScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 32,
+    paddingBottom: spacing.xxxl,
   },
   header: {
-    backgroundColor: COLORS.surface,
-    padding: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.xxl,
+    borderBottomWidth: hairline.borderWidth,
+    borderBottomColor: hairline.borderColor,
+  },
+  eyebrow: {
+    ...typography.eyebrow,
+    color: colors.text.tertiary,
+    marginBottom: spacing.sm,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: COLORS.text.primary,
-    marginBottom: 16,
+    ...typography.h1,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   introText: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: COLORS.text.secondary,
+    ...typography.body,
+    color: colors.text.secondary,
   },
   content: {
-    padding: 24,
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.xxxl,
   },
   section: {
-    marginBottom: 32,
-    padding: 20,
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    marginBottom: spacing.xxxl,
+    padding: spacing.card,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    ...hairline,
+    ...cardShadow,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.text.primary,
-    marginBottom: 12,
+    ...typography.h2,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   subtitle: {
-    fontSize: 16,
+    ...typography.body,
     fontWeight: '600',
-    color: COLORS.text.highlight,
-    marginTop: 12,
-    marginBottom: 8,
+    color: colors.text.primary,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   formulaBox: {
-    backgroundColor: COLORS.formula,
-    padding: 16,
-    borderRadius: 12,
-    marginVertical: 16,
+    backgroundColor: colors.inputBg,
+    padding: spacing.lg,
+    borderRadius: radius.md,
+    marginVertical: spacing.lg,
   },
   formula: {
-    fontSize: 16,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '400',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    color: COLORS.text.accent,
-    marginVertical: 4,
+    color: colors.text.primary,
+    marginVertical: spacing.xs,
   },
   parameterList: {
-    marginVertical: 16,
+    marginVertical: spacing.lg,
   },
   parameter: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
-    marginBottom: 8,
+    ...typography.label,
+    fontWeight: '400',
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
   },
   description: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: COLORS.text.secondary,
-    marginTop: 8,
+    ...typography.body,
+    color: colors.text.secondary,
+    marginTop: spacing.sm,
   },
-  stageGrid: {
-    marginTop: 16,
+  stageTable: {
+    marginTop: spacing.lg,
+  },
+  stageHeaderRow: {
+    flexDirection: 'row',
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider,
+  },
+  stageHeaderCell: {
+    ...typography.eyebrow,
+    letterSpacing: 0.4,
+    color: colors.text.tertiary,
   },
   stageRow: {
     flexDirection: 'row',
-    padding: 12,
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingLeft: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    borderBottomColor: colors.divider,
+  },
+  stageRail: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderRadius: radius.sm,
+  },
+  stageColStage: {
+    flex: 1.2,
+  },
+  stageColRange: {
+    flex: 1.2,
+  },
+  stageColDesc: {
+    flex: 2.6,
   },
   stageCell: {
-    flex: 1,
-    fontSize: 15,
+    ...typography.data,
     fontWeight: '600',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
+  },
+  stageRange: {
+    ...typography.data,
+    fontWeight: '600',
+    color: colors.text.primary,
+    fontVariant: ['tabular-nums'],
   },
   stageCellDescription: {
-    flex: 2,
-    fontSize: 15,
-    color: COLORS.text.secondary,
+    ...typography.data,
+    color: colors.text.secondary,
   },
   cautionBox: {
-    backgroundColor: COLORS.primaryLight,
-    padding: 16,
-    borderRadius: 12,
-    marginTop: 8,
+    backgroundColor: colors.inputBg,
+    paddingVertical: spacing.md,
+    paddingRight: spacing.lg,
+    paddingLeft: spacing.lg,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    borderRadius: radius.sm,
+    marginTop: spacing.sm,
   },
   cautionText: {
-    fontSize: 14,
-    color: COLORS.text.accent,
+    ...typography.label,
+    fontWeight: '400',
     lineHeight: 20,
+    color: colors.text.secondary,
   },
   linkText: {
-    fontSize: 14,
+    ...typography.label,
+    fontWeight: '400',
     color: colors.link,
     textDecorationLine: 'underline',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
-  marginTop16: {
-    marginTop: 16,
+  referenceList: {
+    marginTop: spacing.lg,
   },
 });
 

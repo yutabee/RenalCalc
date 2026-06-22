@@ -1,6 +1,14 @@
-import React, {useEffect, useRef, useCallback} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {View, Text, Animated, StyleSheet} from 'react-native';
-import {colors, readableTextColor} from '../theme';
+import {
+  colors,
+  radius,
+  spacing,
+  typography,
+  raisedShadow,
+  readableTextColor,
+} from '../theme';
+import {useReducedMotion} from '../hooks/useReducedMotion';
 
 interface Stage {
   stage: string;
@@ -9,54 +17,34 @@ interface Stage {
 }
 
 interface ResultCardProps {
+  /** Short kicker above the title (e.g. the metric's full name). */
+  eyebrow?: string;
   title: string;
   value: number;
   unit: string;
   stage?: Stage;
   description?: string;
-  isActive?: boolean;
-  trend?: 'up' | 'down' | 'stable';
 }
 
-const COLORS = {
-  primary: colors.primary,
-  white: colors.surface,
-  text: colors.text,
-  border: colors.border,
-  success: colors.success,
-  warning: colors.warning,
-  danger: colors.danger,
-};
-
 export const ResultCard: React.FC<ResultCardProps> = ({
+  eyebrow,
   title,
   value,
   unit,
   stage,
   description,
-  isActive = false,
-  trend,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  const startPulseAnimation = useCallback(() => {
-    Animated.sequence([
-      Animated.timing(pulseAnim, {
-        toValue: 1.02,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(pulseAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [pulseAnim]);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reduceMotion) {
+      // Skip the entrance motion — show the answer immediately.
+      fadeAnim.setValue(1);
+      scaleAnim.setValue(1);
+      return;
+    }
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -70,173 +58,107 @@ export const ResultCard: React.FC<ResultCardProps> = ({
         useNativeDriver: true,
       }),
     ]).start();
-
-    if (isActive) {
-      startPulseAnimation();
-    }
-  }, [fadeAnim, scaleAnim, isActive, startPulseAnimation]);
-
-  const getTrendColor = () => {
-    switch (trend) {
-      case 'up':
-        return COLORS.success;
-      case 'down':
-        return COLORS.danger;
-      default:
-        return COLORS.text.secondary;
-    }
-  };
+  }, [fadeAnim, scaleAnim, reduceMotion]);
 
   return (
     <Animated.View
       style={[
         styles.container,
-        isActive && styles.activeContainer,
-        {
-          opacity: fadeAnim,
-          transform: [{scale: scaleAnim}, {scale: isActive ? pulseAnim : 1}],
-        },
+        {opacity: fadeAnim, transform: [{scale: scaleAnim}]},
       ]}>
-      {isActive && <View style={styles.activeIndicator} />}
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{title}</Text>
-            {trend && (
-              <View
-                style={[
-                  styles.trendIndicator,
-                  {backgroundColor: getTrendColor()},
-                ]}>
-                <Text style={styles.trendText}>
-                  {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
-                </Text>
-              </View>
-            )}
-          </View>
-          <View style={styles.valueContainer}>
-            <Text style={styles.value}>{value.toLocaleString()}</Text>
-            <Text style={styles.unit}>{unit}</Text>
-          </View>
-        </View>
+      {eyebrow && <Text style={styles.eyebrow}>{eyebrow}</Text>}
+      <Text style={styles.title}>{title}</Text>
 
-        {stage && (
-          <View style={styles.stageContainer}>
-            <View style={[styles.stageBadge, {backgroundColor: stage.color}]}>
-              <Text
-                style={[
-                  styles.stageBadgeText,
-                  {color: readableTextColor(stage.color)},
-                ]}>
-                {stage.stage}
-              </Text>
-            </View>
-            <Text style={styles.stageDescription}>{stage.description}</Text>
-          </View>
-        )}
-
-        {description && <Text style={styles.description}>{description}</Text>}
+      <View style={styles.valueContainer}>
+        <Text
+          style={styles.value}
+          maxFontSizeMultiplier={1.3}
+          numberOfLines={1}
+          adjustsFontSizeToFit>
+          {value.toLocaleString()}
+        </Text>
+        <Text style={styles.unit} maxFontSizeMultiplier={1.4}>
+          {unit}
+        </Text>
       </View>
+
+      {stage && (
+        <View style={styles.stageContainer}>
+          <View style={[styles.stageBadge, {backgroundColor: stage.color}]}>
+            <Text
+              style={[
+                styles.stageBadgeText,
+                {color: readableTextColor(stage.color)},
+              ]}>
+              {stage.stage}
+            </Text>
+          </View>
+          <Text style={styles.stageDescription}>{stage.description}</Text>
+        </View>
+      )}
+
+      {description && <Text style={styles.description}>{description}</Text>}
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
-    borderRadius: 20,
-    backgroundColor: COLORS.white,
-    overflow: 'hidden',
-    shadowColor: COLORS.primary,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: spacing.card,
+    ...raisedShadow,
   },
-  activeContainer: {
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-  },
-  activeIndicator: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: 4,
-    height: '100%',
-    backgroundColor: COLORS.primary,
-  },
-  content: {
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  eyebrow: {
+    ...typography.eyebrow,
+    color: colors.text.tertiary,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.text.primary,
-    marginRight: 8,
-  },
-  trendIndicator: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  trendText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: '600',
+    ...typography.h2,
+    color: colors.text.primary,
+    marginTop: spacing.xs,
   },
   valueContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    flexWrap: 'wrap',
+    marginTop: spacing.md,
   },
   value: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.primary,
-    letterSpacing: -0.5,
+    ...typography.resultValue,
+    color: colors.primary,
+    fontVariant: ['tabular-nums'],
   },
   unit: {
-    fontSize: 16,
-    color: COLORS.text.secondary,
-    marginLeft: 4,
-    fontWeight: '500',
+    ...typography.resultUnit,
+    color: colors.text.secondary,
+    marginLeft: spacing.xs,
   },
   stageContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: spacing.lg,
   },
   stageBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginRight: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.sm,
+    marginRight: spacing.sm,
   },
   stageBadgeText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '600',
+    ...typography.label,
   },
   stageDescription: {
     flex: 1,
-    fontSize: 15,
-    color: COLORS.text.secondary,
-    lineHeight: 20,
+    ...typography.body,
+    color: colors.text.secondary,
   },
   description: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
-    marginTop: 12,
-    lineHeight: 20,
+    ...typography.caption,
+    color: colors.text.secondary,
+    marginTop: spacing.md,
   },
 });
 

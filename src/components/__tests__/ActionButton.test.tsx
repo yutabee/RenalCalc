@@ -45,4 +45,28 @@ describe('ActionButton', () => {
     expect(queryByText('計算する')).toBeNull();
     expect(onPress).not.toHaveBeenCalled();
   });
+
+  it('animates the press-in / press-out without error', () => {
+    const {getByRole} = render(
+      <ActionButton title="計算する" onPress={jest.fn()} />,
+    );
+    const button = getByRole('button');
+
+    fireEvent(button, 'pressIn');
+    fireEvent(button, 'pressOut');
+
+    expect(button).toBeTruthy();
+  });
+
+  it('renders the secondary and tertiary variants', () => {
+    const {getByText, rerender} = render(
+      <ActionButton title="詳細" onPress={jest.fn()} variant="secondary" />,
+    );
+    expect(getByText('詳細')).toBeTruthy();
+
+    rerender(
+      <ActionButton title="詳細" onPress={jest.fn()} variant="tertiary" />,
+    );
+    expect(getByText('詳細')).toBeTruthy();
+  });
 });

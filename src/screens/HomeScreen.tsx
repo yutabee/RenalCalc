@@ -1,22 +1,32 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useCallback} from 'react';
 import {
   SafeAreaView,
   KeyboardAvoidingView,
   ScrollView,
   Text,
   Animated,
+  Easing,
   Keyboard,
   TouchableOpacity,
   Platform,
   View,
   StyleSheet,
-  TextStyle,
+  LayoutChangeEvent,
 } from 'react-native';
 import {ActionButton} from '../components/ActionButton';
 import {ResultCard} from '../components/ResultCard';
 import {InputField} from '../components/InputField';
 import type {CKDStage} from '../types/interfaces';
-import {colors, spacing as SPACING} from '../theme';
+import {
+  colors,
+  spacing,
+  radius,
+  typography,
+  hairline,
+  cardShadow,
+  stageColors,
+} from '../theme';
+import {useReducedMotion} from '../hooks/useReducedMotion';
 import {
   calculateBSA,
   calculateCCr,
@@ -25,32 +35,17 @@ import {
   validateInputs,
   collectInputErrors,
 } from '../utils/calculations';
-import type {CKDStageInfo, InputErrors, Sex} from '../utils/calculations';
-
-const FONTSIZE = {
-  xs: 12,
-  sm: 13,
-  md: 15,
-  lg: 16,
-  xl: 20,
-  xxl: 28,
-};
-
-const COLORS = {...colors, primaryLight: colors.primaryTint};
-
-const STAGE_COLORS: Record<CKDStageInfo['stage'], string> = {
-  G1: COLORS.ckdStages.G1,
-  G2: COLORS.ckdStages.G2,
-  G3a: COLORS.ckdStages.G3a,
-  G3b: COLORS.ckdStages.G3b,
-  G4: COLORS.ckdStages.G4,
-  G5: COLORS.ckdStages.G5,
-};
+import type {InputErrors, Sex} from '../utils/calculations';
 
 const buildStageDisplay = (egfrValue: number): CKDStage => {
   const stageInfo = getCKDStage(egfrValue);
-  return {...stageInfo, color: STAGE_COLORS[stageInfo.stage]};
+  return {...stageInfo, color: stageColors[stageInfo.stage]};
 };
+
+const SEX_OPTIONS: ReadonlyArray<{value: Sex; label: string; a11y: string}> = [
+  {value: 'male', label: '男性', a11y: '男性を選択'},
+  {value: 'female', label: '女性', a11y: '女性を選択'},
+];
 
 interface HomeScreenProps {
   navigation: any;
@@ -69,6 +64,47 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scrollRef = useRef<ScrollView>(null);
+  const reduceMotion = useReducedMotion();
+
+  // Width of a single segment, measured from the track. Guarded against 0 so
+  // the indicator never snaps to a bad position on first render or under jest.
+  const [segmentWidth, setSegmentWidth] = useState<number>(0);
+  const indicatorX = useRef(new Animated.Value(0)).current;
+
+  const selectSex = useCallback(
+    (value: Sex) => {
+      setSex(value);
+      const index = value === 'male' ? 0 : 1;
+      const toValue = segmentWidth * index;
+      // One animation owns the value at a time — stop any in-flight slide first.
+      indicatorX.stopAnimation();
+      if (segmentWidth > 0 && !reduceMotion) {
+        Animated.timing(indicatorX, {
+          toValue,
+          duration: 180,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }).start();
+      } else {
+        // No measured width yet, or reduce-motion: snap without animating.
+        indicatorX.setValue(toValue);
+      }
+    },
+    [segmentWidth, indicatorX, reduceMotion],
+  );
+
+  const handleTrackLayout = useCallback(
+    (e: LayoutChangeEvent) => {
+      const width = e.nativeEvent.layout.width / SEX_OPTIONS.length;
+      if (width > 0) {
+        setSegmentWidth(width);
+        // Snap the indicator under the currently selected segment.
+        const index = sex === 'male' ? 0 : 1;
+        indicatorX.setValue(width * index);
+      }
+    },
+    [sex, indicatorX],
+  );
 
   // Update a field and clear its inline error as soon as the user edits it.
   const makeChangeHandler =
@@ -99,18 +135,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       return;
     }
 
-    Animated.sequence([
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    if (!reduceMotion) {
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
 
     const inputs = validateInputs({age, weight, height, serumCreatinine, sex});
     const bsaValue = calculateBSA(inputs.height, inputs.weight);
@@ -151,49 +189,52 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           showsVerticalScrollIndicator={false}>
           {/* ヘッダーセクション */}
           <View style={styles.header}>
+            <Text style={styles.eyebrow}>臨床計算</Text>
             <Text style={styles.title}>腎機能評価</Text>
             <Text style={styles.subtitle}>日本腎臓学会（JSN）推奨式</Text>
           </View>
+          <View style={styles.headerRule} />
 
           {/* 入力フォームカード */}
           <View style={styles.card}>
+            <Text style={styles.cardEyebrow}>入力</Text>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>性別</Text>
-              <View style={styles.segmentedControl}>
-                <TouchableOpacity
+              <View
+                style={styles.segmentedControl}
+                onLayout={handleTrackLayout}
+                accessibilityRole="radiogroup"
+                accessibilityLabel="性別">
+                <Animated.View
+                  pointerEvents="none"
                   style={[
-                    styles.segmentButton,
-                    sex === 'male' && styles.segmentButtonActive,
+                    styles.segmentIndicator,
+                    {
+                      width: segmentWidth,
+                      transform: [{translateX: indicatorX}],
+                    },
                   ]}
-                  onPress={() => setSex('male')}
-                  accessibilityLabel="男性を選択"
-                  accessibilityRole="radio"
-                  accessibilityState={{checked: sex === 'male'}}>
-                  <Text
-                    style={[
-                      styles.segmentButtonText,
-                      sex === 'male' && styles.segmentButtonTextActive,
-                    ]}>
-                    男性
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.segmentButton,
-                    sex === 'female' && styles.segmentButtonActive,
-                  ]}
-                  onPress={() => setSex('female')}
-                  accessibilityLabel="女性を選択"
-                  accessibilityRole="radio"
-                  accessibilityState={{checked: sex === 'female'}}>
-                  <Text
-                    style={[
-                      styles.segmentButtonText,
-                      sex === 'female' && styles.segmentButtonTextActive,
-                    ]}>
-                    女性
-                  </Text>
-                </TouchableOpacity>
+                />
+                {SEX_OPTIONS.map(option => {
+                  const active = sex === option.value;
+                  return (
+                    <TouchableOpacity
+                      key={option.value}
+                      style={styles.segmentButton}
+                      onPress={() => selectSex(option.value)}
+                      accessibilityLabel={option.a11y}
+                      accessibilityRole="radio"
+                      accessibilityState={{checked: active}}>
+                      <Text
+                        style={[
+                          styles.segmentButtonText,
+                          active && styles.segmentButtonTextActive,
+                        ]}>
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
 
@@ -255,6 +296,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
               <Text style={styles.sectionTitle}>計算結果</Text>
               {egfr !== null && (
                 <ResultCard
+                  eyebrow="推算糸球体濾過量"
                   title="eGFR"
                   value={egfr}
                   unit="mL/min/1.73m²"
@@ -262,11 +304,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                 />
               )}
               {ccr !== null && (
-                <ResultCard title="CCr" value={ccr} unit="mL/min" />
+                <ResultCard
+                  eyebrow="クレアチニンクリアランス"
+                  title="CCr"
+                  value={ccr}
+                  unit="mL/min"
+                />
               )}
               {bsa !== null && (
                 <ResultCard
-                  title="体表面積 (BSA)"
+                  eyebrow="体表面積"
+                  title="BSA"
                   value={bsa}
                   unit="m²"
                   description="藤本式"
@@ -276,6 +324,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           )}
 
           {/* フッター */}
+          <View style={styles.footerRule} />
           <View style={styles.footer}>
             <ActionButton
               title="計算式の詳細"
@@ -310,131 +359,144 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   keyboardAvoid: {
     flex: 1,
   },
   scrollContainer: {
-    paddingBottom: SPACING.lg,
+    paddingBottom: spacing.xl,
   },
   header: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.lg,
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.lg,
+  },
+  eyebrow: {
+    ...typography.eyebrow,
+    color: colors.text.tertiary,
+    marginBottom: spacing.sm,
   },
   title: {
-    fontSize: FONTSIZE.xxl,
-    fontWeight: '700' as TextStyle['fontWeight'],
-    color: COLORS.text.primary,
-    marginBottom: SPACING.sm,
+    ...typography.h1,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
   subtitle: {
-    fontSize: FONTSIZE.md,
-    color: COLORS.text.secondary,
-    lineHeight: 20,
+    ...typography.body,
+    color: colors.text.secondary,
+  },
+  headerRule: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.gutter,
+    marginBottom: spacing.xxl,
   },
   card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 20,
-    padding: SPACING.lg,
-    marginHorizontal: SPACING.md,
-    marginBottom: SPACING.lg,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.card,
+    marginHorizontal: spacing.gutter,
+    marginBottom: spacing.xxl,
+    ...hairline,
+    ...cardShadow,
+  },
+  cardEyebrow: {
+    ...typography.eyebrow,
+    color: colors.text.tertiary,
+    marginBottom: spacing.lg,
   },
   inputGroup: {
-    marginBottom: SPACING.lg,
+    marginBottom: spacing.lg,
   },
   label: {
-    fontSize: FONTSIZE.md,
-    fontWeight: '600' as TextStyle['fontWeight'],
-    color: COLORS.text.primary,
-    marginBottom: SPACING.sm,
+    ...typography.label,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primaryLight,
-    borderRadius: 12,
-    padding: SPACING.xs,
-    height: 48,
+    backgroundColor: colors.inputBg,
+    borderRadius: radius.md,
+    height: 44,
+    ...hairline,
+    overflow: 'hidden',
+  },
+  segmentIndicator: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    ...hairline,
   },
   segmentButton: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 10,
-  },
-  segmentButtonActive: {
-    backgroundColor: COLORS.primary,
   },
   segmentButtonText: {
-    fontSize: FONTSIZE.lg,
-    color: COLORS.text.secondary,
-    fontWeight: '600' as TextStyle['fontWeight'],
+    ...typography.label,
+    color: colors.text.secondary,
   },
   segmentButtonTextActive: {
-    color: COLORS.surface,
+    color: colors.text.primary,
   },
   actionContainer: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
+    paddingHorizontal: spacing.gutter,
+    marginBottom: spacing.xxl,
   },
   resultsContainer: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
+    paddingHorizontal: spacing.gutter,
+    marginBottom: spacing.xxl,
   },
   sectionTitle: {
-    fontSize: FONTSIZE.xl,
-    fontWeight: '700' as TextStyle['fontWeight'],
-    color: COLORS.text.primary,
-    marginBottom: SPACING.lg,
+    ...typography.h2,
+    color: colors.text.primary,
+    marginBottom: spacing.lg,
+  },
+  footerRule: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.gutter,
+    marginBottom: spacing.lg,
   },
   footer: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.xl,
+    paddingHorizontal: spacing.gutter,
+    paddingBottom: spacing.xl,
   },
   footerDivider: {
-    height: SPACING.lg,
+    height: spacing.lg,
   },
   legalLinks: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    marginBottom: spacing.md,
   },
   legalButton: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.md,
+    minHeight: 44, // Apple HIG / WCAG 2.5.5 minimum tap target
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
   },
   legalButtonText: {
-    fontSize: FONTSIZE.sm,
-    color: COLORS.text.secondary,
+    ...typography.legal,
+    color: colors.text.tertiary,
     textDecorationLine: 'underline',
   },
   legalDot: {
     width: 3,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: COLORS.text.secondary,
-    marginHorizontal: SPACING.sm,
+    backgroundColor: colors.text.tertiary,
+    marginHorizontal: spacing.sm,
     opacity: 0.5,
   },
   disclaimer: {
-    fontSize: FONTSIZE.xs,
-    color: COLORS.text.secondary,
+    ...typography.legal,
+    color: colors.text.tertiary,
     textAlign: 'center',
-    lineHeight: 18,
   },
 });
 
