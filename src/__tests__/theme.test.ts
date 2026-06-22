@@ -25,3 +25,15 @@ describe('CKD stage ramp contrast', () => {
     ]);
   });
 });
+
+describe('readableTextColor', () => {
+  it('returns dark text on a light background', () => {
+    expect(readableTextColor('#FFFFFF')).toBe(colors.text.primary);
+    expect(readableTextColor('#F1F4F8')).toBe(colors.text.primary);
+  });
+
+  it('returns white text on a dark background', () => {
+    expect(readableTextColor('#1B2B4B')).toBe(colors.text.onPrimary);
+    expect(readableTextColor('#000000')).toBe(colors.text.onPrimary);
+  });
+});
