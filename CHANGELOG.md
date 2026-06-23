@@ -9,6 +9,38 @@ boundary is treated as significant** and is called out explicitly below.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-06-23
+
+No changes to the clinical formulas or CKD stage boundaries — the calculation
+logic is byte-for-byte identical to 1.0.1 (guarded by the acceptance tests).
+
+### Changed
+
+- Redesigned the UI into a calmer, clinical "reference document" look: hairline
+  cards with rationed elevation (the result reads as the instrument value),
+  a tabular-numerals result hero, a refined type scale, and one desaturated,
+  AA-contrast CKD severity colour ramp applied consistently across the result
+  badge and the formulas table.
+
+### Added
+
+- Inline, per-field input validation (errors appear under each field and clear as
+  you type) replacing the previous single modal alert; results auto-scroll into
+  view on calculation.
+
+### Accessibility
+
+- Honour the OS "Reduce Motion" setting, enforce 44pt minimum tap targets,
+  AA-compliant text/badge contrast, and a programmatic radio-group for the sex
+  selector.
+
+### Security / CI
+
+- Hardened the release pipeline: commit-SHA-pinned actions, the App Store Connect
+  signing key isolated to a protected `production` environment, build-provenance
+  attestation, CodeQL (incl. workflow scanning), and a checksum-verified secret
+  scanner.
+
 ## [1.0.1] - 2026-06-19
 
 ### Changed
